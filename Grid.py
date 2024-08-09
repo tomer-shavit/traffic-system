@@ -1,4 +1,6 @@
 from typing import List, Tuple, Dict
+
+from Coordinate import Coordinate
 from Junction import Junction
 from TrafficLight import TrafficLight, Direction
 from Car import Car
@@ -44,33 +46,25 @@ class Grid:
         for i in range(self.n):
             for j in range(self.m):
                 junction = self.junctions[i][j]
-                direction, moving_cars = junction.update_junction()
+                direction, moving_cars = junction.resolve_moving_cars()
 
                 for car in moving_cars:
-                    if direction == Direction.VERTICAL and i < self.n - 1:
-                        cars_to_move.append((car, i, j, i + 1, j))  # Move down
-                    elif direction == Direction.HORIZONTAL and j < self.m - 1:
-                        cars_to_move.append((car, i, j, i, j + 1))  # Move right
+                    if direction == Direction.VERTICAL and j < self.m - 1:
+                        cars_to_move.append((car, Coordinate(i, j), Coordinate(i, j + 1)))  # Move Up
+                    elif direction == Direction.HORIZONTAL and i < self.n - 1:
+                        cars_to_move.append((car, Coordinate(i, j), Coordinate(i + 1, j)))  # Move Right
 
         # Now move the cars
-        for car, old_i, old_j, new_i, new_j in cars_to_move:
-            self.junctions[old_i][old_j].remove_car(car)
-            self.junctions[new_i][new_j].add_car(car)
+        for car, old_coordinate, new_coordinate in cars_to_move:
+            self.junctions[old_coordinate.x][old_coordinate.y].remove_car(car)
+            self.junctions[new_coordinate.x][new_coordinate.y].add_car(car)
+            car.update_current_location()
 
     def get_total_avg_wait_time(self) -> float:
         """Calculate the average wait time across all unique cars in all junctions."""
-        total_wait_time = 0
-        unique_cars = set()
 
-        for row in self.junctions:
-            for junction in row:
-                total_wait_time += sum(junction.cars_wait_time.values())
-                unique_cars.update(junction.cars_wait_time.keys())
-
-        if not unique_cars:
-            return 0.0
-
-        return total_wait_time / len(unique_cars)
+        return sum([sum([junction.get_avg_wait_time() for junction in junctions]) for junctions in
+                    self.junctions]) / (self.m * self.n)
 
     def add_car_to_junction(self, car: Car, i: int, j: int) -> None:
         """Add a car to a specific junction."""

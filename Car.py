@@ -1,7 +1,8 @@
 from typing import List, NamedTuple, Optional
-import Coordinate
+from Coordinate import Coordinate
 from Direction import Direction
 import random
+
 
 class Car:
     def __init__(self, car_id: str, source: Coordinate, destination: Coordinate, start_time: int):
@@ -22,7 +23,7 @@ class Car:
         next_location = self._path[self._current_location_index + 1]
 
         if current_location.x == next_location.x:
-            return Direction.HORIZONTAL
+            return Direction.VERTICAL
         else:
             return Direction.HORIZONTAL
 

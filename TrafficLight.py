@@ -1,10 +1,9 @@
-from dataclasses import dataclass
 from Direction import Direction
 
 
-@dataclass
 class TrafficLight:
-    current_direction: Direction = Direction.HORIZONTAL
+    def __init__(self):
+        self.current_direction: Direction = Direction.HORIZONTAL
 
     def get_current_direction(self) -> Direction:
         """Get the current direction of the traffic light."""

@@ -21,16 +21,13 @@ class Junction:
         if car.id in self.cars:
             del self.cars[car.id]
 
-    def update_junction(self) -> Tuple[Direction, List[Car]]:
+    def resolve_moving_cars(self) -> Tuple[Direction, List[Car]]:
         """
         Update the junction state and return the current traffic light direction
         and the list of cars that can move.
         """
         current_direction = self.traffic_light.get_current_direction()
         cars_to_move = [car for car in self.cars.values() if car.current_direction() == current_direction]
-
-        for car in cars_to_move:
-            del self.cars[car.id]
 
         for car_id, car in self.cars.items():
             self.cars_wait_time[car_id] += 1
@@ -44,22 +41,10 @@ class Junction:
 
     def get_avg_wait_time(self) -> float:
         """Calculate and return the average wait time of cars in the junction."""
-        if not self.cars:
+        if not self.cars_wait_time:
             return 0.0
         total_wait_time = sum(self.cars_wait_time.values())
         return total_wait_time / len(self.cars_wait_time)
-
-    def get_car(self, car_id: str) -> Car:
-        """Get a car by its ID."""
-        return self.cars.get(car_id)
-
-    def get_cars(self) -> List[Car]:
-        """Get all cars in the junction."""
-        return list(self.cars.values())
-
-    def get_car_wait_time(self, car_id: str) -> int:
-        """Get the wait time for a specific car."""
-        return self.cars_wait_time.get(car_id, 0)
 
     def clear_junction(self) -> None:
         """Remove all cars from the junction."""
