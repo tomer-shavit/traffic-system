@@ -104,5 +104,5 @@ class City:
         return cls(n, m, num_cars, residential_coords, industrial_coords)
 
     @classmethod
-    def generate_cities(cls, n: int, m: int, num_cars: int, num_cities):
+    def generate_cities(cls, n: int, m: int, num_cars: int, num_cities) -> List['City']:
         return [City.generate_city(n, m, num_cars) for _ in range(num_cities)]
