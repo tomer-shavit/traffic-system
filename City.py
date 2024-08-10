@@ -1,4 +1,7 @@
 from typing import List, Tuple, Sequence
+
+from numpy import ndarray
+
 from Car import Car
 from TrafficLight import TrafficLight
 from Grid import Grid
@@ -16,7 +19,7 @@ class City:
         self.traffic_lights = self.init_traffic_lights(n, m)
         self.grid = self.init_grid(n, m, self.cars, self.traffic_lights)
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
-        self.counter = 0
+
 
     def init_cars(self, amount: int) -> List[Car]:
         """Initialize a specified number of cars."""
@@ -56,10 +59,50 @@ class City:
         """Initialize the traffic system."""
         return TrafficSystem(traffic_lights)
 
-    def init_counter(self) -> None:
-        """Initialize or reset the counter."""
-        self.counter = 0
+    def did_all_cars_arrive(self) -> bool:
+        status = True
+        for car in self.cars:
+            status = status and car.get_did_arrive()
+
+        return status
+
+    def get_current_avg_wait_time(self):
+        self.grid.get_total_avg_wait_time()
+
+    def update_traffic_lights(self, assignment: ndarray):
+        self.traffic_system.update_traffic_lights(assignment)
 
     def generate_state(self) -> Grid:
         """Generate the current state of the city."""
         pass
+
+    @classmethod
+    def generate_city(cls, n: int, m: int, num_cars: int) -> 'City':
+        """
+        Generates a city with the specified parameters.
+        Residential coordinates are a subset of {(0,0), (0,1), (1,0), (1,1)}.
+        Industrial coordinates are a subset of {(n,m), (n-1,m), (n,m-1), (n-1,m-1)}.
+
+        Parameters:
+        - n (int): Number of rows in the city grid.
+        - m (int): Number of columns in the city grid.
+        - num_cars (int): Number of cars to generate in the city.
+
+        Returns:
+        - City: A generated City object.
+        """
+        possible_residential = [Coordinate(0, 0), Coordinate(0, 1), Coordinate(1, 0), Coordinate(1, 1)]
+        possible_industrial = [Coordinate(n-1, m-1), Coordinate(n-2, m-1), Coordinate(n-1, m-2), Coordinate(n-2, m-2)]
+
+        # Ensure at least one residential and one industrial coordinate
+        num_residential = random.randint(1, len(possible_residential))
+        num_industrial = random.randint(1, len(possible_industrial))
+
+        residential_coords = random.sample(possible_residential, num_residential)
+        industrial_coords = random.sample(possible_industrial, num_industrial)
+
+        return cls(n, m, num_cars, residential_coords, industrial_coords)
+
+    @classmethod
+    def generate_cities(cls, n: int, m: int, num_cars: int, num_cities):
+        return [City.generate_city(n, m, num_cars) for _ in range(num_cities)]
