@@ -17,20 +17,19 @@ class City:
         self.industrial_coords = industrial_coords
         self.cars = self.init_cars(num_cars)
         self.traffic_lights = self.init_traffic_lights(n, m)
-        self.grid = self.init_grid(n, m, self.cars, self.traffic_lights)
+        self.grid = self.init_grid(self.cars, self.traffic_lights)
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
-
 
     def init_cars(self, amount: int) -> List[Car]:
         """Initialize a specified number of cars."""
-        return [self.init_car() for _ in range(amount)]
+        return [self.init_car(i) for i in range(amount)]
 
-    def init_car(self) -> Car:
+    def init_car(self, car_num: int) -> Car:
         """Initialize a single car with random source, destination, and departure time."""
         source = self.get_random_location(self.residential_coords)
         dest = self.get_random_location(self.industrial_coords)
         departure_time = self.get_normal_departure_time(0, 10)
-        return Car(f"Car_{self.counter}", source, dest, departure_time)
+        return Car(f"Car_{car_num}", source, dest, departure_time)
 
     def get_normal_departure_time(self, mean: float, std_dev: float) -> int:
         """Generate a normally distributed departure time within 0 to 10 and round to a whole number."""
@@ -47,7 +46,7 @@ class City:
         """Initialize traffic lights for an n x m grid."""
         return [[TrafficLight() for _ in range(m)] for _ in range(n)]
 
-    def init_grid(self, n: int, m: int, cars: List[Car], traffic_lights: List[List[TrafficLight]]) -> Grid:
+    def init_grid(self, cars: List[Car], traffic_lights: List[List[TrafficLight]]) -> Grid:
         """Initialize the city grid."""
         grid = Grid(traffic_lights)
         for car in cars:
@@ -92,7 +91,8 @@ class City:
         - City: A generated City object.
         """
         possible_residential = [Coordinate(0, 0), Coordinate(0, 1), Coordinate(1, 0), Coordinate(1, 1)]
-        possible_industrial = [Coordinate(n-1, m-1), Coordinate(n-2, m-1), Coordinate(n-1, m-2), Coordinate(n-2, m-2)]
+        possible_industrial = [Coordinate(n - 1, m - 1), Coordinate(n - 2, m - 1), Coordinate(n - 1, m - 2),
+                               Coordinate(n - 2, m - 2)]
 
         # Ensure at least one residential and one industrial coordinate
         num_residential = random.randint(1, len(possible_residential))
