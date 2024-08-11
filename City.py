@@ -106,11 +106,12 @@ class City:
             print()
             print()
 
-    def did_all_cars_arrive(self):
-            for car in self.cars:
-                if not car.get_did_arrive():
-                    return False
-            return True
+    def driving_cars_amount(self) -> int:
+        num_of_driving_cars = 0
+        for car in self.cars:
+            if not car.get_did_arrive():
+                num_of_driving_cars += 1
+        return num_of_driving_cars
 
     def generate_state(self) -> Grid:
         """Generate the current state of the city."""

@@ -29,3 +29,4 @@ Here is a visual representation of the matrix:
 1. Num of cities
 2. Num of cars
 3. Mutation rate
+4. Penalty for not all cars reaching destination
