@@ -38,6 +38,7 @@ class GeneticSolver:
         Returns:
         - np.ndarray: A (t, n, m) array where each element is either Direction.HORIZONTAL or Direction.VERTICAL.
         """
+        # TODO: check coordinates
         return np.random.choice([Direction.HORIZONTAL, Direction.VERTICAL], size=(self.t, self.n, self.m))
 
     def crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
@@ -74,7 +75,7 @@ class GeneticSolver:
 
         return solution
 
-    def create_offspring(self, parents: np.ndarray) -> np.ndarray:
+    def create_children(self, parents: np.ndarray) -> np.ndarray:
         """
         Creates a new population of offspring by performing crossover and mutation on the parent solutions.
 
@@ -84,14 +85,15 @@ class GeneticSolver:
         Returns:
         - np.ndarray: A new population of offspring solutions.
         """
-        offspring = np.empty((self.population_size, self.t, self.n, self.m), dtype=object)
+        children = np.empty((self.population_size, self.t, self.n, self.m), dtype=object)
         for i in range(0, self.population_size, 2):
             parent1, parent2 = np.random.choice(len(parents), 2, replace=False)
             child1 = self.crossover(parents[parent1], parents[parent2])
             child2 = self.crossover(parents[parent2], parents[parent1])
-            offspring[i, :, :, :] = self.mutate(child1)
-            offspring[i + 1, :, :, :] = self.mutate(child2)
-        return offspring
+            children[i, :, :, :] = self.mutate(child1)
+            children[i + 1, :, :, :] = self.mutate(child2)
+
+        return children
 
     def evaluate_solution(self, solution: np.ndarray, cities: List[City]) -> float:
         """
@@ -108,8 +110,8 @@ class GeneticSolver:
         total_avg_wait_time = 0
         for city in cities:
             for t in range(self.t):
-                city.traffic_system.update_traffic_lights(solution[t])
-                city.grid.update_grid()
+                city.update_city(solution[t])
+
 
             if city.did_all_cars_arrive():
                 total_avg_wait_time += city.grid.get_total_avg_wait_time()
@@ -146,23 +148,24 @@ class GeneticSolver:
         Returns:
         - np.ndarray: The best solution found after all generations.
         """
-        population = np.array([self.generate_random_solution() for _ in range(self.population_size)])
+        population = [self.generate_random_solution() for _ in range(self.population_size)]
 
         for generation in range(self.generations):
             # Generate new random cities for this generation
             cities = City.generate_cities(self.n, self.m, num_cars, num_cities)
 
             fitness_scores = np.array([self.evaluate_solution(solution, cities) for solution in population])
-            best_index = np.argmin(fitness_scores)
+            best_index = np.argmin(fitness_scores)  # TODO: get a single minimum
             best_solution = population[best_index]
             best_fitness = fitness_scores[best_index]
 
             print(f"Generation {generation + 1}: Best fitness = {best_fitness}")
 
             parents = self.select_parents(population, fitness_scores)
-            offspring = self.create_offspring(parents)
+            offspring = self.create_children(parents)
 
             # Elitism: Keep the best solution
+            #TODO: check if size of population change and if its OK
             population = np.concatenate((offspring[:-1], best_solution.reshape(1, self.t, self.n, self.m)))
 
         final_fitness_scores = np.array([self.evaluate_solution(solution, cities) for solution in population])

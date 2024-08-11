@@ -20,3 +20,12 @@ Here is a visual representation of the matrix:
 
 - Each cell `(i, j)` in the table corresponds to the grid coordinates.
 - The top-left corner of the grid is `(0, 0)`, and the bottom-right corner is `(n-1, m-1)`.
+
+## Assumptions 
+1. The size of the city is at least 4X4
+
+## Hyper Parameters
+### Genetic algorithm
+1. Num of cities
+2. Num of cars
+3. Mutation rate

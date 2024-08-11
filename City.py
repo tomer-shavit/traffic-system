@@ -19,6 +19,7 @@ class City:
         self.traffic_lights = self.init_traffic_lights(n, m)
         self.grid = self.init_grid(self.cars, self.traffic_lights)
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
+        self.time = 0
 
     def init_cars(self, amount: int) -> List[Car]:
         """Initialize a specified number of cars."""
@@ -49,29 +50,23 @@ class City:
     def init_grid(self, cars: List[Car], traffic_lights: List[List[TrafficLight]]) -> Grid:
         """Initialize the city grid."""
         grid = Grid(traffic_lights)
-        for car in cars:
-            coor = car.source
-            grid.add_car_to_junction(car, coor.x, coor.y)
         return grid
 
     def init_traffic_system(self, traffic_lights: list[list[TrafficLight]]) -> TrafficSystem:
         """Initialize the traffic system."""
         return TrafficSystem(traffic_lights)
 
-    def did_all_cars_arrive(self) -> bool:
-        status = True
-        for car in self.cars:
-            status = status and car.get_did_arrive()
-
-        return status
 
     def get_current_avg_wait_time(self):
         return self.grid.get_total_avg_wait_time()
 
-    def update_traffic_lights(self, assignment: ndarray):
-        return self.traffic_system.update_traffic_lights(assignment)
+    def update_city(self, assignment: ndarray):
+        self.traffic_system.update_traffic_lights(assignment)
+        self.grid.update_grid()
+        self.add_cars_to_grid_by_time()
+        self.time += 1
 
-    def all_cars_arrived(self):
+    def did_all_cars_arrive(self):
         for car in self.cars:
             if not car.get_did_arrive():
                 return False
@@ -112,3 +107,9 @@ class City:
     @classmethod
     def generate_cities(cls, n: int, m: int, num_cars: int, num_cities) -> List['City']:
         return [City.generate_city(n, m, num_cars) for _ in range(num_cities)]
+
+    def add_cars_to_grid_by_time(self):
+        for car in self.cars:
+            if car.start_time == self.time:
+                self.grid.add_car_to_junction(car, car.source)
+

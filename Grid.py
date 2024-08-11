@@ -65,19 +65,12 @@ class Grid:
         return sum([sum([junction.get_avg_wait_time() for junction in junctions]) for junctions in
                     self.junctions]) / (self.m * self.n)
 
-    def add_car_to_junction(self, car: Car, i: int, j: int) -> None:
+    def add_car_to_junction(self, car: Car, coordinate: Coordinate) -> None:
         """Add a car to a specific junction."""
-        if 0 <= i < self.n and 0 <= j < self.m:
-            self.junctions[i][j].add_car(car)
+        if 0 <= coordinate.x < self.n and 0 <= coordinate.y < self.m:
+            self.junctions[coordinate.x][coordinate.y].add_car(car)
         else:
-            print(f"Invalid junction coordinates: ({i}, {j})")
-
-    def get_junction(self, i: int, j: int) -> Junction:
-        """Get a specific junction from the grid."""
-        if 0 <= i < self.n and 0 <= j < self.m:
-            return self.junctions[i][j]
-        else:
-            raise IndexError(f"Junction coordinates out of range: ({i}, {j})")
+            print(f"Invalid junction coordinates: ({coordinate.x}, {coordinate.y})")
 
     def get_grid_state(self) -> List[List[Dict]]:
         """Get the current state of all junctions in the grid."""

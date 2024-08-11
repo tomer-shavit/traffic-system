@@ -13,9 +13,9 @@ if __name__ == "__main__":
     print("###### Test 1: ######")
     print(f"m = {m}, n = {n}, num_cars = {num_cars}:\n")
     city.grid.print()
-    while not city.all_cars_arrived():
+    while not city.did_all_cars_arrive():
         rand_traffic = np.random.choice(list(Direction), size=(n, m))
-        city.update_traffic_lights(rand_traffic)
+        city.update_city(rand_traffic)
         city.grid.update_grid()
         print("###### next step: ######")
         print(rand_traffic)
