@@ -47,8 +47,8 @@ class Car:
 
         while current != self._destination:
             next_step = self._choose_next_step(current)
-            if np.random.random(1)[0] < NOISE_CAR_PATH:
-                next_step = self._flip_next_step(current, next_step)
+            # if np.random.random(1)[0] < NOISE_CAR_PATH:
+            #     next_step = self._flip_next_step(current, next_step)
             self._path.append(next_step)
             current = next_step
 
