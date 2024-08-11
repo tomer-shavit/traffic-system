@@ -12,14 +12,14 @@ if __name__ == "__main__":
     city = City(n,m,num_cars, [res_coor], [ind_coor])
     print("###### Test 1: ######")
     print(f"m = {m}, n = {n}, num_cars = {num_cars}:\n")
-    city.grid.print()
+    # city.grid.print()
     while not city.did_all_cars_arrive():
         rand_traffic = np.random.choice(list(Direction), size=(n, m))
-        city.update_city(rand_traffic)
+        city.update_city(rand_traffic, True)
         city.grid.update_grid()
         print("###### next step: ######")
         print(rand_traffic)
-        city.grid.print()
+        # city.grid.print()
         print(f"waiting time: {city.get_current_avg_wait_time()}")
     print("\n\n")
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     city = City(n, m, num_cars, [res_coor], [ind_coor])
     print("###### Test 2: ######")
     print(f"m = {m}, n = {n}, num_cars = {num_cars}\n")
-    city.grid.print()
+    # city.grid.print()
 
     # while not city.all_cars_arrived():
     #     city.grid.update_grid()

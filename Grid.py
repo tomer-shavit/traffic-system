@@ -14,29 +14,29 @@ class Grid:
             [Junction(traffic_lights[i][j]) for j in range(self.m)] for i in range(self.n)
         ]
 
-    def print(self) -> None:
-        """Print a visual representation of the grid."""
-        for i in range(self.n):
-            # Print horizontal junctions
-            for j in range(self.m):
-                junction = self.junctions[i][j]
-                vertical_cars = sum(
-                    1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
-                horizontal_cars = sum(
-                    1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
-                light_direction = 'V' if junction.traffic_light.get_current_direction() == Direction.VERTICAL else 'H'
-                print(f"[D:{light_direction},V:{vertical_cars:2d},H:{horizontal_cars:2d}]", end="")
-                if j < self.m - 1:
-                    print(" -- ", end="")
-            print()  # New line after each row of junctions
-
-            # Print vertical connections, if not the last row
-            if i < self.n - 1:
-                for j in range(self.m):
-                    print("        |         ", end="")
-                    if j < self.m - 1:
-                        print("    ", end="")
-                print()  # New line after vertical connections
+    # def print(self) -> None:
+    #     """Print a visual representation of the grid."""
+    #     for i in range(self.n):
+    #         # Print horizontal junctions
+    #         for j in range(self.m):
+    #             junction = self.junctions[i][j]
+    #             vertical_cars = sum(
+    #                 1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
+    #             horizontal_cars = sum(
+    #                 1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+    #             light_direction = 'V' if junction.traffic_light.get_current_direction() == Direction.VERTICAL else 'H'
+    #             print(f"[D:{light_direction},V:{vertical_cars:2d},H:{horizontal_cars:2d}]", end="")
+    #             if j < self.m - 1:
+    #                 print(" -- ", end="")
+    #         print()  # New line after each row of junctions
+    #
+    #         # Print vertical connections, if not the last row
+    #         if i < self.n - 1:
+    #             for j in range(self.m):
+    #                 print("        |         ", end="")
+    #                 if j < self.m - 1:
+    #                     print("    ", end="")
+    #             print()  # New line after vertical connections
 
     def update_grid(self) -> None:
         """Update the state of all junctions in the grid and move cars."""
