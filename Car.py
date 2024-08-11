@@ -23,9 +23,9 @@ class Car:
         next_location = self._path[self._current_location_index + 1]
 
         if current_location.x == next_location.x:
-            return Direction.VERTICAL
-        else:
             return Direction.HORIZONTAL
+        else:
+            return Direction.VERTICAL
 
     def get_did_arrive(self) -> bool:
         return self._did_arrive

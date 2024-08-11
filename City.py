@@ -50,8 +50,8 @@ class City:
         """Initialize the city grid."""
         grid = Grid(traffic_lights)
         for car in cars:
-            i, j = car.source
-            grid.add_car_to_junction(car, i, j)
+            coor = car.source
+            grid.add_car_to_junction(car, coor.x, coor.y)
         return grid
 
     def init_traffic_system(self, traffic_lights: list[list[TrafficLight]]) -> TrafficSystem:
@@ -70,6 +70,12 @@ class City:
 
     def update_traffic_lights(self, assignment: ndarray):
         self.traffic_system.update_traffic_lights(assignment)
+
+    def all_cars_arrived(self):
+        for car in self.cars:
+            if not car.get_did_arrive():
+                return False
+        return True
 
     def generate_state(self) -> Grid:
         """Generate the current state of the city."""
