@@ -66,10 +66,10 @@ class City:
         return status
 
     def get_current_avg_wait_time(self):
-        self.grid.get_total_avg_wait_time()
+        return self.grid.get_total_avg_wait_time()
 
     def update_traffic_lights(self, assignment: ndarray):
-        self.traffic_system.update_traffic_lights(assignment)
+        return self.traffic_system.update_traffic_lights(assignment)
 
     def all_cars_arrived(self):
         for car in self.cars:
