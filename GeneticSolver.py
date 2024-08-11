@@ -96,7 +96,7 @@ class GeneticSolver:
 
         return children
 
-    def evaluate_solution(self, solution: np.ndarray, cities: List[City]) -> float:
+    def evaluate_solution(self, solution: np.ndarray, cities: List[City], debug: bool = False) -> float:
         """
         Evaluates a solution by simulating it across multiple city scenarios and calculating the average waiting
         time for cars.
@@ -112,7 +112,7 @@ class GeneticSolver:
         waiting_cars_penalty = 0
         for city in cities:
             for t in range(self.t):
-                city.update_city(solution[t])
+                city.update_city(solution[t], debug)
 
             total_avg_wait_time += city.get_current_avg_wait_time()
 
@@ -152,13 +152,15 @@ class GeneticSolver:
         - np.ndarray: The best solution found after all generations.
         """
         population = self.initialize_population()
-
+        cities = []
         for generation in range(self.generations):
+            cities.clear()
             cities = self.generate_cities_for_generation(num_cities, num_cars)
             fitness_scores = self.evaluate_population(population, cities)
             best_solution, best_fitness = self.find_best_solution(population, fitness_scores)
 
             print(f"Generation {generation + 1}: Best fitness = {best_fitness}")
+            self.evaluate_solution(best_solution, [City.generate_city(self.n, self.m, num_cars)], generation % 25 == 0)
 
             parents = self.select_parents(population, fitness_scores)
             children = self.create_children(parents)

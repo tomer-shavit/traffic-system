@@ -81,29 +81,48 @@ class City:
 
     def print(self, assignment: ndarray):
         """Print a visual representation of the City."""
-        print("Waiting vehicles (V for vertical, H for horizontal):")
+        print("City layout:")
+        # ANSI color codes
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        RESET = "\033[0m"
+
         for i in range(self.n):
+            # Print junctions and horizontal connections
             for j in range(self.m):
                 junction = self.grid.junctions[i][j]
+                light_direction = 'V' if assignment[i, j] == Direction.VERTICAL else 'H'
                 vertical_cars = sum(
                     1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
                 horizontal_cars = sum(
                     1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
-                print(f"[V:{vertical_cars:2d},H:{horizontal_cars:2d}]", end="")
+
+                # Color the direction only if there are cars in the junction
+                total_cars = vertical_cars + horizontal_cars
+                if total_cars > 0:
+                    direction_color = GREEN if light_direction == 'V' else YELLOW
+                else:
+                    direction_color = ""
+
+                # Color the car counts, keeping zeros white
+                v_color = GREEN if vertical_cars > 0 else ""
+                h_color = YELLOW if horizontal_cars > 0 else ""
+
+                print(
+                    f"[D:{direction_color}{light_direction}{RESET}, V:{v_color}{vertical_cars:2d}{RESET},"
+                    f" H:{h_color}{horizontal_cars:2d}{RESET}, (i:{i},j:{j})]",
+                    end="")
                 if j < self.m - 1:
                     print(" -- ", end="")
-            print()
             print()
 
-        print("Traffic light directions (V for vertical, H for horizontal):")
-        for i in range(self.n):
-            for j in range(self.m):
-                junction = self.grid.junctions[i][j]
-                light_direction = 'V' if assignment[i, j] == Direction.VERTICAL else 'H'
-                print(f"[D:{light_direction}]", end="")
-                if j < self.m - 1:
-                    print(" -- ", end="")
-            print()
+            # Print vertical connections
+            if i < self.n - 1:
+                for j in range(self.m):
+                    print("           |           ", end="")
+                    if j < self.m - 1:
+                        print("     ", end="")
+                print()
             print()
 
     def driving_cars_amount(self) -> int:
