@@ -1,8 +1,8 @@
 from GeneticSolver import GeneticSolver
 population_size = 100
-n = 6
-m = 6
-t = 20
+n = 4
+m = 4
+t = 15
 
 mutation_rate = 0.005
 generations = 1000

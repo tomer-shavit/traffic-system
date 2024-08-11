@@ -11,7 +11,7 @@ from Coordinate import Coordinate
 
 INDUSTRIAL_SIZE = 2
 RESIDENTIAL_SIZE = 2
-MAX_TIME_TO_START = 10
+MAX_TIME_TO_START = 4
 MIN_TIME_TO_START = 0
 
 class City:
@@ -81,11 +81,14 @@ class City:
 
     def print(self, assignment: ndarray):
         """Print a visual representation of the City."""
+        print("-----------------------------------------------------------------------------")
         print("City layout:")
         # ANSI color codes
         GREEN = "\033[32m"
         YELLOW = "\033[33m"
         RESET = "\033[0m"
+        BLUE = "\033[34m"
+        PURPLE = "\033[35m"
 
         for i in range(self.n):
             # Print junctions and horizontal connections
@@ -108,9 +111,16 @@ class City:
                 v_color = GREEN if vertical_cars > 0 else ""
                 h_color = YELLOW if horizontal_cars > 0 else ""
 
+                # Color coordinates based on type
+                coord_color = ""
+                if any(coord.x == i and coord.y == j for coord in self.residential_coords):
+                    coord_color = BLUE
+                elif any(coord.x == i and coord.y == j for coord in self.industrial_coords):
+                    coord_color = PURPLE
+
                 print(
                     f"[D:{direction_color}{light_direction}{RESET}, V:{v_color}{vertical_cars:2d}{RESET},"
-                    f" H:{h_color}{horizontal_cars:2d}{RESET}, (i:{i},j:{j})]",
+                    f" H:{h_color}{horizontal_cars:2d}{RESET}, {coord_color}(i:{i},j:{j}){RESET}]",
                     end="")
                 if j < self.m - 1:
                     print(" -- ", end="")
@@ -123,7 +133,6 @@ class City:
                     if j < self.m - 1:
                         print("     ", end="")
                 print()
-            print()
 
     def driving_cars_amount(self) -> int:
         num_of_driving_cars = 0
