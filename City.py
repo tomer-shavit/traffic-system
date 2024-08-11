@@ -5,7 +5,7 @@ from numpy import ndarray
 from Car import Car
 from TrafficLight import TrafficLight
 from Grid import Grid
-from TrafficSystem import TrafficSystem
+from TrafficSystem import TrafficSystem, Direction
 import random
 from Coordinate import Coordinate
 
@@ -25,6 +25,9 @@ class City:
         self.grid = self.init_grid(self.traffic_lights)
         self.init_cars(num_cars)
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
+        self.time = 0
+        self.n = n
+        self.m = m
 
 
     def init_cars(self, amount: int):
@@ -66,12 +69,42 @@ class City:
     def get_current_avg_wait_time(self):
         return self.grid.get_total_avg_wait_time()
 
-    def update_city(self, assignment: ndarray):
-        self.remove_cars_from_grid()
+
+    def update_city(self, assignment: ndarray, debug: bool = False):
         self.traffic_system.update_traffic_lights(assignment)
+        if debug:
+            self.print(assignment)
+        self.remove_cars_from_grid()
         self.grid.update_grid()
         self.add_cars_to_grid_by_time()
         self.time += 1
+
+    def print(self, assignment: ndarray):
+        """Print a visual representation of the City."""
+        print("Waiting vehicles (V for vertical, H for horizontal):")
+        for i in range(self.n):
+            for j in range(self.m):
+                junction = self.grid.junctions[i][j]
+                vertical_cars = sum(
+                    1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
+                horizontal_cars = sum(
+                    1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+                print(f"[V:{vertical_cars:2d},H:{horizontal_cars:2d}]", end="")
+                if j < self.m - 1:
+                    print(" -- ", end="")
+            print()
+            print()
+
+        print("Traffic light directions (V for vertical, H for horizontal):")
+        for i in range(self.n):
+            for j in range(self.m):
+                junction = self.grid.junctions[i][j]
+                light_direction = 'V' if assignment[i, j] == Direction.VERTICAL else 'H'
+                print(f"[D:{light_direction}]", end="")
+                if j < self.m - 1:
+                    print(" -- ", end="")
+            print()
+            print()
 
     def did_all_cars_arrive(self):
             for car in self.cars:
