@@ -2,7 +2,8 @@ import numpy as np
 from typing import List, Callable
 from City import City
 from Direction import Direction
-from Grid import Grid
+
+NOT_REACHING_DEST_PENALTY = 1000
 
 
 class GeneticSolver:
@@ -29,6 +30,7 @@ class GeneticSolver:
         self.n = n
         self.m = m
         self.t = t
+        self.fitness = []
 
     def generate_random_solution(self) -> np.ndarray:
         """
@@ -38,7 +40,6 @@ class GeneticSolver:
         Returns:
         - np.ndarray: A (t, n, m) array where each element is either Direction.HORIZONTAL or Direction.VERTICAL.
         """
-        # TODO: check coordinates
         return np.random.choice([Direction.HORIZONTAL, Direction.VERTICAL], size=(self.t, self.n, self.m))
 
     def crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
@@ -95,7 +96,7 @@ class GeneticSolver:
 
         return children
 
-    def evaluate_solution(self, solution: np.ndarray, cities: List[City]) -> float:
+    def evaluate_solution(self, solution: np.ndarray, cities: List[City], debug: bool = False) -> float:
         """
         Evaluates a solution by simulating it across multiple city scenarios and calculating the average waiting
         time for cars.
@@ -108,17 +109,19 @@ class GeneticSolver:
         - float: The average waiting time for cars, or infinity if not all cars reach their destinations.
         """
         total_avg_wait_time = 0
+        waiting_cars_penalty = 0
         for city in cities:
             for t in range(self.t):
-                city.update_city(solution[t])
+                city.update_city(solution[t], debug)
 
+            total_avg_wait_time += city.get_current_avg_wait_time()
 
-            if city.did_all_cars_arrive():
-                total_avg_wait_time += city.grid.get_total_avg_wait_time()
-            else:
-                return np.inf
+            waiting_cars_penalty += city.driving_cars_amount() * NOT_REACHING_DEST_PENALTY
 
-        return total_avg_wait_time / len(cities)
+        return self.avg_wait_time(len(cities), total_avg_wait_time) + waiting_cars_penalty
+
+    def avg_wait_time(self, cities_amount: int, total_avg_wait_time: float):
+        return total_avg_wait_time / cities_amount
 
     def select_parents(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
         """
@@ -136,43 +139,60 @@ class GeneticSolver:
         parent_indices = np.random.choice(len(population), size=self.population_size, p=probabilities)
         return population[parent_indices]
 
-    def solve(self, num_cities: int, num_cars: int) -> np.ndarray[Direction]:
+    def solve(self, num_cities: int, num_cars: int) -> np.ndarray:
         """
         Runs the genetic algorithm to find the optimal traffic light configuration that minimizes average car waiting times.
         For each generation, it creates new random cities to evaluate the solutions.
 
         Parameters:
-        - city_generator (Callable[[], City]): A function that generates a random City object.
         - num_cities (int): The number of cities to generate and evaluate for each generation.
+        - num_cars (int): The number of cars to simulate in each city.
 
         Returns:
         - np.ndarray: The best solution found after all generations.
         """
-        population = [self.generate_random_solution() for _ in range(self.population_size)]
-
+        population = self.initialize_population()
+        cities = []
         for generation in range(self.generations):
-            # Generate new random cities for this generation
-            cities = City.generate_cities(self.n, self.m, num_cars, num_cities)
-
-            fitness_scores = np.array([self.evaluate_solution(solution, cities) for solution in population])
-            best_index = np.argmin(fitness_scores)  # TODO: get a single minimum
-            best_solution = population[best_index]
-            best_fitness = fitness_scores[best_index]
+            cities.clear()
+            cities = self.generate_cities_for_generation(num_cities, num_cars)
+            fitness_scores = self.evaluate_population(population, cities)
+            best_solution, best_fitness = self.find_best_solution(population, fitness_scores)
 
             print(f"Generation {generation + 1}: Best fitness = {best_fitness}")
+            self.evaluate_solution(best_solution, [City.generate_city(self.n, self.m, num_cars)], generation % 25 == 0)
 
             parents = self.select_parents(population, fitness_scores)
-            offspring = self.create_children(parents)
+            children = self.create_children(parents)
+            population = self.update_population_with_best(children, best_solution, fitness_scores)
 
-            # Elitism: Keep the best solution
-            #TODO: check if size of population change and if its OK
-            population = np.concatenate((offspring[:-1], best_solution.reshape(1, self.t, self.n, self.m)))
-
-        final_fitness_scores = np.array([self.evaluate_solution(solution, cities) for solution in population])
-        best_final_index = np.argmin(final_fitness_scores)
-        best_final_solution = population[best_final_index]
-        best_final_fitness = final_fitness_scores[best_final_index]
+        best_final_solution, best_final_fitness = self.find_best_solution(population, fitness_scores)
 
         print(f"Final Best Fitness: {best_final_fitness}")
 
         return best_final_solution
+
+    def initialize_population(self) -> np.ndarray:
+        """Initializes the population with random solutions."""
+        return np.array([self.generate_random_solution() for _ in range(self.population_size)])
+
+    def generate_cities_for_generation(self, num_cities: int, num_cars: int) -> list:
+        """Generates a new set of random cities for this generation."""
+        return City.generate_cities(self.n, self.m, num_cars, num_cities)
+
+    def evaluate_population(self, population: np.ndarray, cities: list) -> np.ndarray:
+        """Evaluates the fitness of each solution in the population."""
+        return np.array([self.evaluate_solution(solution, cities) for solution in population])
+
+    def find_best_solution(self, population: np.ndarray, fitness_scores: np.ndarray) -> tuple:
+        """Finds the best solution and its fitness in the current population."""
+        best_index = np.argmin(fitness_scores)
+        return population[best_index], fitness_scores[best_index]
+
+    def update_population_with_best(self, children: np.ndarray, best_solution: np.ndarray,
+                                    fitness_scores: np.ndarray) -> np.ndarray:
+        """Updates the population by replacing the worst solution with the best solution
+         from the previous generation."""
+        worst_index = np.argmax(fitness_scores)
+        return np.concatenate(
+            (children[:worst_index], children[worst_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
