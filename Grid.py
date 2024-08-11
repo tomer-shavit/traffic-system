@@ -6,7 +6,6 @@ from TrafficLight import TrafficLight, Direction
 from Car import Car
 
 
-
 class Grid:
     def __init__(self, traffic_lights: List[List[TrafficLight]]):
         self.n = len(traffic_lights)
@@ -16,30 +15,6 @@ class Grid:
         ]
         self.vertical_junctions: List[Coordinate] = self.init_vertical_junctions()
         self.horizontal_junctions: List[Coordinate] = self.init_horizontal_junctions()
-
-    # def print(self) -> None:
-    #     """Print a visual representation of the grid."""
-    #     for i in range(self.n):
-    #         # Print horizontal junctions
-    #         for j in range(self.m):
-    #             junction = self.junctions[i][j]
-    #             vertical_cars = sum(
-    #                 1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
-    #             horizontal_cars = sum(
-    #                 1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
-    #             light_direction = 'V' if junction.traffic_light.get_current_direction() == Direction.VERTICAL else 'H'
-    #             print(f"[D:{light_direction},V:{vertical_cars:2d},H:{horizontal_cars:2d}]", end="")
-    #             if j < self.m - 1:
-    #                 print(" -- ", end="")
-    #         print()  # New line after each row of junctions
-    #
-    #         # Print vertical connections, if not the last row
-    #         if i < self.n - 1:
-    #             for j in range(self.m):
-    #                 print("        |         ", end="")
-    #                 if j < self.m - 1:
-    #                     print("    ", end="")
-    #             print()  # New line after vertical connections
 
     def update_grid(self) -> None:
         """Update the state of all junctions in the grid and move cars."""
@@ -87,9 +62,8 @@ class Grid:
 
     def init_horizontal_junctions(self):
         # TODO: choose the junctions smatrer
-        middle = [Coordinate(self.n//2, j) for j in range(self.m)]
+        middle = [Coordinate(self.n // 2, j) for j in range(self.m)]
         return middle
-
 
     def allow_directions(self, coordinate: Coordinate) -> List[Direction]:
         if coordinate in self.vertical_junctions:
@@ -99,4 +73,3 @@ class Grid:
         if coordinate in self.horizontal_junctions:
             return [Direction.HORIZONTAL]
         return [Direction.VERTICAL, Direction.HORIZONTAL]
-
