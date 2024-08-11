@@ -4,9 +4,9 @@ import numpy as np
 from Direction import Direction
 
 if __name__ == "__main__":
-    m = 2
-    n = 3
-    num_cars = 1
+    m = 3
+    n = 4
+    num_cars = 2
     res_coor = Coordinate(0,0)
     ind_coor = Coordinate(n-1, m-1)
     city = City(n,m,num_cars, [res_coor], [ind_coor])
@@ -20,6 +20,7 @@ if __name__ == "__main__":
         print("###### next step: ######")
         print(rand_traffic)
         city.grid.print()
+        print(f"waiting time: {city.get_current_avg_wait_time()}")
     print("\n\n")
 
     m = 5
