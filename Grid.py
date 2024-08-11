@@ -49,10 +49,10 @@ class Grid:
                 direction, moving_cars = junction.resolve_moving_cars()
 
                 for car in moving_cars:
-                    if direction == Direction.VERTICAL and j < self.m - 1:
-                        cars_to_move.append((car, Coordinate(i, j), Coordinate(i, j + 1)))  # Move Up
-                    elif direction == Direction.HORIZONTAL and i < self.n - 1:
-                        cars_to_move.append((car, Coordinate(i, j), Coordinate(i + 1, j)))  # Move Right
+                    if direction == Direction.VERTICAL and i < self.n - 1:
+                        cars_to_move.append((car, Coordinate(i, j), Coordinate(i + 1, j)))  # Move Up
+                    elif direction == Direction.HORIZONTAL and j < self.m - 1:
+                        cars_to_move.append((car, Coordinate(i, j), Coordinate(i, j + 1)))  # Move Right
 
         # Now move the cars
         for car, old_coordinate, new_coordinate in cars_to_move:
