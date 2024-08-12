@@ -14,8 +14,8 @@ class Grid:
         self.junctions: List[List[Junction]] = [
             [Junction(traffic_lights[i][j]) for j in range(self.m)] for i in range(self.n)
         ]
-        self.vertical_junctions: List[Coordinate] = self.init_vertical_junctions([2, self.m-3], self.n-3)
-        self.horizontal_junctions: List[Coordinate] = self.init_horizontal_junctions( [2, self.n-3], self.m-3)
+        self.vertical_junctions: List[Coordinate] = self.init_vertical_junctions([2, self.m-3], self.n-4)
+        self.horizontal_junctions: List[Coordinate] = self.init_horizontal_junctions( [2, self.n-3], self.m-4)
 
     # def print(self) -> None:
     #     """Print a visual representation of the grid."""
@@ -87,10 +87,10 @@ class Grid:
         :return: List of Coordinates for vertical junctions.
         """
         vertical_junctions = []
-        for column in vertical_highways:
-            for i in range(self.n):
-                for w in range(width):
-                    vertical_junctions.append(Coordinate(i, column + w))
+        start_point = (self.n - width) // 2
+        for row in vertical_highways:
+            for w in range(width):
+                vertical_junctions.append(Coordinate(start_point + w, row))
         return vertical_junctions
 
     def init_horizontal_junctions(self, horizontal_highways: List[int], width: int = 1) -> List[Coordinate]:
@@ -101,10 +101,10 @@ class Grid:
         :return: List of Coordinates for horizontal junctions.
         """
         horizontal_junctions = []
-        for row in horizontal_highways:
-            for j in range(self.m):
-                for w in range(width):
-                    horizontal_junctions.append(Coordinate(row + w, j))
+        start_point = (self.m - width) // 2
+        for column in horizontal_highways:
+            for w in range(width):
+                horizontal_junctions.append(Coordinate(column, start_point + w))
         return horizontal_junctions
 
     def allow_directions(self, coordinate: Coordinate) -> List[Direction]:

@@ -6,7 +6,7 @@ from Coordinate import Coordinate
 from Direction import Direction
 import random
 
-NOISE_CAR_PATH = 0.05
+NOISE_CAR_PATH = 0.1
 
 class Car:
     def __init__(self, car_id: str, source: Coordinate, destination: Coordinate, start_time: int, allow_directions):
@@ -85,6 +85,10 @@ class Car:
     def start_time(self) -> int:
         return self._start_time
 
+    @property
+    def path(self) -> List[Coordinate]:
+        return self._path
+
     def _flip_next_step(self, current: Coordinate, next_step: Coordinate) -> Coordinate:
         """
         flip the next step. if the next step is horizontal, so move vertical instead, and vise versa.
@@ -106,8 +110,8 @@ class Car:
         if len(allowed_directions) == 1:
             direction = allowed_directions[0]
             if direction == Direction.VERTICAL:
-                return Coordinate(current.x, current.y + 1)
-            return Coordinate(current.x + 1, current.y)
+                return Coordinate(current.x + 1, current.y)
+            return Coordinate(current.x, current.y + 1)
 
         return Coordinate(-1, -1)
 
