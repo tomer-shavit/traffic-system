@@ -4,15 +4,14 @@ import numpy as np
 from Direction import Direction
 
 if __name__ == "__main__":
-    m = 10
-    n = 12
-    num_cars = 3
-    res_coor = Coordinate(0,0)
-    ind_coor = Coordinate(n-1, m-1)
-    city = City(n,m,num_cars, [res_coor], [ind_coor])
+    m = 6
+    n = 6
+    num_cars = 10
+
+    city = City.generate_city(n, m, num_cars)
     print("###### Test 1: ######")
     print(f"m = {m}, n = {n}, num_cars = {num_cars}:\n")
-    while not city.did_all_cars_arrive():
+    while 0 != city.driving_cars_amount():
         rand_traffic = np.random.choice(list(Direction), size=(n, m))
         city.update_city(rand_traffic, True)
         print("###### next step: ######")
