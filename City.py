@@ -9,7 +9,7 @@ from TrafficSystem import TrafficSystem, Direction
 import random
 from Coordinate import Coordinate
 
-INDUSTRIAL_SIZE = 2
+INDUSTRIAL_SIZE = 1
 RESIDENTIAL_SIZE = 2
 MAX_TIME_TO_START = 4
 MIN_TIME_TO_START = 0
@@ -25,7 +25,6 @@ class City:
         self.grid = self.init_grid(self.traffic_lights)
         self.init_cars(num_cars)
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
-        self.time = 0
         self.n = n
         self.m = m
 
@@ -38,13 +37,13 @@ class City:
         """Initialize a single car with random source, destination, and departure time."""
         source = self.get_random_location(self.residential_coords)
         dest = self.get_random_location(self.industrial_coords)
-        departure_time = self.get_normal_departure_time(MIN_TIME_TO_START, MAX_TIME_TO_START)
+        departure_time = self.get_normal_departure_time(MAX_TIME_TO_START/2, MAX_TIME_TO_START/2)
         return Car(f"Car_{car_num}", source, dest, departure_time, self.grid.allow_directions)
 
     def get_normal_departure_time(self, mean: float, std_dev: float) -> int:
         """Generate a normally distributed departure time within 0 to 10 and round to a whole number."""
         departure_time = round(random.normalvariate(mean, std_dev))
-        return max(0, min(10, departure_time))
+        return max(0, min(MAX_TIME_TO_START, departure_time))
 
     def get_random_location(self, coords: List[Coordinate]) -> Coordinate:
         """Select a location based on a normal distribution among all locations."""
@@ -189,7 +188,16 @@ class City:
             if car.start_time == self.time:
                 self.grid.add_car_to_junction(car, car.source)
 
+    def reset_city(self) -> None:
+        self.reset_cars()
+        self.grid.reset()
+        self.time = 0
+
     def remove_cars_from_grid(self):
         for car in self.cars:
             if car.current_location == car.destination:
                 self.grid.junctions[car.destination.x][car.destination.y].remove_car(car)
+
+    def reset_cars(self) -> None:
+        for car in self.cars:
+            car.reset()

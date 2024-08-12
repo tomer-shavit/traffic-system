@@ -16,6 +16,10 @@ class Junction:
         if car.id not in self.cars_wait_time:
             self.cars_wait_time[car.id] = 0
 
+    def reset(self):
+        self.cars.clear()
+        self.cars_wait_time.clear()
+
     def remove_car(self, car: Car) -> None:
         """Remove a single car from the junction."""
         if car.id in self.cars:
