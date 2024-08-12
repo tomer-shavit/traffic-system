@@ -2,6 +2,9 @@ import numpy as np
 from typing import List, Callable
 from City import City
 from Direction import Direction
+import matplotlib.pyplot as plt
+
+from Reporter import Reporter
 
 NOT_REACHING_DEST_PENALTY = 1000
 
@@ -12,7 +15,7 @@ class GeneticSolver:
     The goal is to minimize the average waiting time for cars across multiple city scenarios.
     """
 
-    def __init__(self, population_size: int, mutation_rate: float, generations: int, n: int, m: int, t: int):
+    def __init__(self, population_size: int, reporter: Reporter, mutation_rate: float, generations: int, n: int, m: int, t: int):
         """
         Initializes the GeneticSolver with the necessary parameters.
 
@@ -27,10 +30,10 @@ class GeneticSolver:
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.generations = generations
+        self.reporter = reporter
         self.n = n
         self.m = m
         self.t = t
-        self.fitness = []
 
     def generate_random_solution(self) -> np.ndarray:
         """
@@ -115,10 +118,15 @@ class GeneticSolver:
                 city.update_city(solution[t], debug)
 
             total_avg_wait_time += city.get_current_avg_wait_time()
-
             waiting_cars_penalty += city.driving_cars_amount() * NOT_REACHING_DEST_PENALTY
 
-        return self.avg_wait_time(len(cities), total_avg_wait_time) + waiting_cars_penalty
+            city.reset_city()
+
+        return self.avg_wait_time(len(cities), total_avg_wait_time) + \
+            self.get_driving_penalty_avg(cities, waiting_cars_penalty)
+
+    def get_driving_penalty_avg(self, cities, waiting_cars_penalty):
+        return (waiting_cars_penalty / len(cities))
 
     def avg_wait_time(self, cities_amount: int, total_avg_wait_time: float):
         return total_avg_wait_time / cities_amount
@@ -160,13 +168,15 @@ class GeneticSolver:
             best_solution, best_fitness = self.find_best_solution(population, fitness_scores)
 
             print(f"Generation {generation + 1}: Best fitness = {best_fitness}")
-            self.evaluate_solution(best_solution, [City.generate_city(self.n, self.m, num_cars)], generation % 25 == 0)
+            self.evaluate_solution(best_solution, [City.generate_city(self.n, self.m, num_cars)], False)
 
             parents = self.select_parents(population, fitness_scores)
             children = self.create_children(parents)
             population = self.update_population_with_best(children, best_solution, fitness_scores)
+            self.reporter.record_generations_best_solutions(best_fitness, best_solution)
 
         best_final_solution, best_final_fitness = self.find_best_solution(population, fitness_scores)
+        self.reporter.record_generations_best_solutions(best_final_fitness, best_final_solution)
 
         print(f"Final Best Fitness: {best_final_fitness}")
 
@@ -180,7 +190,7 @@ class GeneticSolver:
         """Generates a new set of random cities for this generation."""
         return City.generate_cities(self.n, self.m, num_cars, num_cities)
 
-    def evaluate_population(self, population: np.ndarray, cities: list) -> np.ndarray:
+    def evaluate_population(self, population: np.ndarray, cities: List[City]) -> np.ndarray:
         """Evaluates the fitness of each solution in the population."""
         return np.array([self.evaluate_solution(solution, cities) for solution in population])
 
@@ -196,3 +206,12 @@ class GeneticSolver:
         worst_index = np.argmax(fitness_scores)
         return np.concatenate(
             (children[:worst_index], children[worst_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
+
+    def plot_fitness_history(self):
+        plt.figure(figsize=(10, 6))
+        plt.plot(range(1, len(self.fitness_history) + 1), self.fitness_history)
+        plt.title('Fitness over Generations')
+        plt.xlabel('Generation')
+        plt.ylabel('Fitness (lower is better)')
+        plt.grid(True)
+        plt.show()

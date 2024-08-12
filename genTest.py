@@ -1,14 +1,17 @@
 from GeneticSolver import GeneticSolver
+
 population_size = 100
-n = 4
-m = 4
-t = 15
+n = 10
+m = 10
+t = 40
+
 
 mutation_rate = 0.005
-generations = 1000
+generations = 10000
+
 num_cities = 10
-num_cars = 100
+num_cars = 50
 
 solver = GeneticSolver(population_size, mutation_rate, generations, n, m, t)
-solver.solve(num_cities, num_cars)
-
+best_solution = solver.solve(num_cities, num_cars)
+solver.plot_fitness_history()

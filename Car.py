@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 import numpy as np
 
@@ -9,7 +9,8 @@ import random
 NOISE_CAR_PATH = 0.1
 
 class Car:
-    def __init__(self, car_id: str, source: Coordinate, destination: Coordinate, start_time: int, allow_directions):
+    def __init__(self, car_id: str, source: Coordinate, destination: Coordinate, start_time: int,
+                 allow_directions: Callable[[Coordinate], List[Direction]]):
         self._id: str = car_id
         self._source: Coordinate = source
         self._destination: Coordinate = destination
@@ -64,6 +65,10 @@ class Car:
 
         if self._current_location_index == len(self._path) - 1:
             self._did_arrive = True
+
+    def reset(self):
+        self._did_arrive = False
+        self._current_location_index = 0
 
     @property
     def id(self) -> str:
