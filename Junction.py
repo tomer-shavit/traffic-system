@@ -3,14 +3,13 @@ from typing import Dict, List, Tuple
 from TrafficLight import TrafficLight, Direction
 from Car import Car
 
-JUNCTION_LIMIT = 10
-
 
 class Junction:
-    def __init__(self, traffic_light: TrafficLight):
+    def __init__(self, traffic_light: TrafficLight, car_limit: int):
         self.traffic_light = traffic_light
         self.cars: Dict[str, Car] = dict()
         self.cars_wait_time: Dict[str, int] = dict()
+        self.car_limit = car_limit
 
     def add_car(self, car: Car) -> None:
         """Add a single car to the junction."""
@@ -36,7 +35,7 @@ class Junction:
         """
         current_direction = self.traffic_light.get_current_direction()
         cars_to_move = [car for car in self.cars.values() if car.current_direction() == current_direction]
-        cars_to_move = cars_to_move[:JUNCTION_LIMIT]
+        cars_to_move = cars_to_move[:self.car_limit]
 
         for car_id, car in self.cars.items():
             self.cars_wait_time[car_id] += 1
