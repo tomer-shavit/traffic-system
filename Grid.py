@@ -5,7 +5,9 @@ from Junction import Junction
 from TrafficLight import TrafficLight, Direction
 from Car import Car
 
-
+START_HIGH_WAY = 2
+END_REFERENCE_HIGHWAY = 3
+GAP_HIGH_WAY = 4
 
 class Grid:
     def __init__(self, traffic_lights: List[List[TrafficLight]]):
@@ -14,8 +16,10 @@ class Grid:
         self.junctions: List[List[Junction]] = [
             [Junction(traffic_lights[i][j]) for j in range(self.m)] for i in range(self.n)
         ]
-        self.vertical_junctions: List[Coordinate] = self.init_vertical_junctions([2, self.m-3], self.n-4)
-        self.horizontal_junctions: List[Coordinate] = self.init_horizontal_junctions( [2, self.n-3], self.m-4)
+        self.vertical_junctions: List[Coordinate] = (self.init_vertical_junctions(
+            [START_HIGH_WAY, self.m - END_REFERENCE_HIGHWAY], self.n - GAP_HIGH_WAY))
+        self.horizontal_junctions: List[Coordinate] = (self.init_horizontal_junctions(
+                [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
 
     def reset(self):
         for junctions in self.junctions:

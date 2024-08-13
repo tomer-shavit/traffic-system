@@ -2,12 +2,13 @@ import numpy as np
 
 from City import City
 from Direction import Direction
+from Reporter import Reporter
 from Solver import Solver
 
 
 class BaseLineSolver(Solver):
-    def __init__(self, n: int, m: int, t: int):
-        super().__init__(n, m, t)
+    def __init__(self, n: int, m: int, t: int, reporter: Reporter):
+        super().__init__(n, m, t, reporter)
 
     def solve(self) -> np.ndarray:
         """

@@ -3,12 +3,13 @@ from abc import abstractmethod, ABC
 import numpy as np
 from typing import List
 from City import City
+from Reporter import Reporter
 
-NOT_REACHING_DEST_PENALTY = 1000
+NOT_REACHING_DEST_PENALTY = 10
 
 
 class Solver(ABC):
-    def __init__(self, n: int, m: int, t: int):
+    def __init__(self, n: int, m: int, t: int, reporter: Reporter,):
         """
         Initializes the Solver with the necessary grid parameters.
 
@@ -20,6 +21,8 @@ class Solver(ABC):
         self.n = n
         self.m = m
         self.t = t
+        self.reporter = reporter
+
     @abstractmethod
     def solve(self, *args, **kwargs):
         """
@@ -54,7 +57,7 @@ class Solver(ABC):
             self.get_driving_penalty_avg(cities, waiting_cars_penalty)
 
     def get_driving_penalty_avg(self, cities, waiting_cars_penalty):
-        return (waiting_cars_penalty / len(cities))
+        return waiting_cars_penalty / len(cities)
 
     def avg_wait_time(self, cities_amount: int, total_avg_wait_time: float):
         return total_avg_wait_time / cities_amount

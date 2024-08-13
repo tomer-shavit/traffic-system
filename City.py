@@ -1,7 +1,5 @@
-from typing import List, Tuple, Sequence
-
+from typing import List
 from numpy import ndarray
-
 from Car import Car
 from TrafficLight import TrafficLight
 from Grid import Grid
@@ -14,10 +12,12 @@ RESIDENTIAL_SIZE = 2
 MAX_TIME_TO_START = 4
 MIN_TIME_TO_START = 0
 
+INF_INT = 10000
+
 class City:
     def __init__(self, n: int, m: int, num_cars: int, residential_coords: List[Coordinate],
                  industrial_coords: List[Coordinate]):
-        self.cars = None
+        self.cars: List[Car] = []
         self.time = 0
         self.residential_coords = residential_coords
         self.industrial_coords = industrial_coords
@@ -27,6 +27,8 @@ class City:
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
         self.n = n
         self.m = m
+        self.num_of_driving_cars = len(self.cars)
+        self.all_cars_arrived_time: int = INF_INT
 
 
     def init_cars(self, amount: int):
@@ -64,10 +66,8 @@ class City:
         """Initialize the traffic system."""
         return TrafficSystem(traffic_lights)
 
-
     def get_current_avg_wait_time(self):
         return self.grid.get_total_avg_wait_time()
-
 
     def update_city(self, assignment: ndarray, debug: bool = False):
         self.traffic_system.update_traffic_lights(assignment)
@@ -76,6 +76,7 @@ class City:
         self.remove_cars_from_grid()
         self.grid.update_grid()
         self.add_cars_to_grid_by_time()
+        self.update_cars_arrival_time()
         self.time += 1
 
     def print(self, assignment: ndarray):
@@ -134,11 +135,7 @@ class City:
                 print()
 
     def driving_cars_amount(self) -> int:
-        num_of_driving_cars = 0
-        for car in self.cars:
-            if not car.get_did_arrive():
-                num_of_driving_cars += 1
-        return num_of_driving_cars
+        return self.num_of_driving_cars
 
     def generate_state(self) -> Grid:
         """Generate the current state of the city."""
@@ -192,12 +189,20 @@ class City:
         self.reset_cars()
         self.grid.reset()
         self.time = 0
+        self.all_cars_arrived_time = INF_INT
+        self.num_of_driving_cars = len(self.cars)
 
     def remove_cars_from_grid(self):
         for car in self.cars:
-            if car.current_location == car.destination:
+            if car.current_location == car.destination and not car.get_did_arrive():
                 self.grid.junctions[car.destination.x][car.destination.y].remove_car(car)
+                self.num_of_driving_cars -= 1
 
     def reset_cars(self) -> None:
         for car in self.cars:
             car.reset()
+
+    def update_cars_arrival_time(self):
+        if self.num_of_driving_cars == 0 and self.all_cars_arrived_time > self.time:
+            self.all_cars_arrived_time = self.time
+

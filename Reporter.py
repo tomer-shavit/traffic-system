@@ -21,8 +21,12 @@ class Reporter:
             ('junction_id', 'U20')
         ])
 
+        self.all_cars_arrive_time = np.empty((0,), dtype=[
+            ('time', float)
+        ])
+
         self.best_solutions = np.empty((0,), dtype=[
-            ('fitness', int),
+            ('fitness', float),
             ('solution', object)
         ])
 
@@ -33,6 +37,12 @@ class Reporter:
             horizontal_count
         )], dtype=self.vehicle_counts.dtype)
         self.vehicle_counts = np.append(self.vehicle_counts, record)
+
+    def record_all_cars_arrive(self, time: float):
+        record = np.array([(
+            time
+        )], dtype=self.all_cars_arrive_time.dtype)
+        self.all_cars_arrive_time = np.append(self.all_cars_arrive_time, record)
 
     def record_avg_wait_time(self, junction_id: Coordinate, avg_wait_time: float):
         record = np.array([(
@@ -67,3 +77,6 @@ class Reporter:
 
     def get_best_solutions(self) -> np.ndarray:
         return self.best_solutions
+
+    def get_arrival_times(self) -> np.ndarray:
+        return self.all_cars_arrive_time

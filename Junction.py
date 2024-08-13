@@ -24,6 +24,8 @@ class Junction:
         """Remove a single car from the junction."""
         if car.id in self.cars:
             del self.cars[car.id]
+            if car.current_location == car.destination:
+                car.set_did_arrive(True)
 
     def resolve_moving_cars(self) -> Tuple[Direction, List[Car]]:
         """
@@ -48,7 +50,7 @@ class Junction:
         if not self.cars_wait_time:
             return 0.0
         total_wait_time = sum(self.cars_wait_time.values())
-        return total_wait_time / len(self.cars_wait_time)
+        return total_wait_time
 
     def clear_junction(self) -> None:
         """Remove all cars from the junction."""

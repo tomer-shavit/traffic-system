@@ -12,18 +12,19 @@ class GeneticSolver(Solver):
     The goal is to minimize the average waiting time for cars across multiple city scenarios.
     """
 
-    def __init__(self, population_size: int, reporter: Reporter, mutation_rate: float, generations: int, n: int, m: int, t: int):
+    def __init__(self, population_size: int, mutation_rate: float, generations: int, n: int, m: int, t: int,
+                 reporter: Reporter):
         """
         Initializes the GeneticSolver with the necessary parameters.
         - population_size (int): The number of solutions in each generation's population.
         - mutation_rate (float): The probability of a mutation occurring at each gene in a solution.
         - generations (int): The number of generations to evolve the population.
         """
-        super().__init__(n, m, t)
+        super().__init__(n, m, t, reporter)
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.generations = generations
-        self.reporter = reporter
+
 
     def generate_random_solution(self) -> np.ndarray:
         """
@@ -124,7 +125,6 @@ class GeneticSolver(Solver):
             best_solution, best_fitness = self.find_best_solution(population, fitness_scores)
 
             print(f"Generation {generation + 1}: Best fitness = {best_fitness}")
-            self.evaluate_solution(best_solution, [City.generate_city(self.n, self.m, num_cars)], False)
 
             parents = self.select_parents(population, fitness_scores)
             children = self.create_children(parents)
@@ -164,9 +164,22 @@ class GeneticSolver(Solver):
             (children[:worst_index], children[worst_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
 
     def plot_fitness_history(self):
+        #TODO: ask Tomer what is self.fitness_history?
         plt.figure(figsize=(10, 6))
         plt.plot(range(1, len(self.fitness_history) + 1), self.fitness_history)
         plt.title('Fitness over Generations')
+        plt.xlabel('Generation')
+        plt.ylabel('Fitness (lower is better)')
+        plt.grid(True)
+        plt.show()
+
+    def plot_best_fitness(self, fitness_values):
+        """
+        Plots the best fitness value in each generation.
+        """
+        plt.figure(figsize=(10, 6))
+        plt.plot(fitness_values, marker='o')
+        plt.title('Best Fitness Over Generations')
         plt.xlabel('Generation')
         plt.ylabel('Fitness (lower is better)')
         plt.grid(True)

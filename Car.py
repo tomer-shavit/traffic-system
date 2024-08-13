@@ -36,6 +36,9 @@ class Car:
     def get_did_arrive(self) -> bool:
         return self._did_arrive
 
+    def set_did_arrive(self, arrive: bool):
+        self._did_arrive = arrive
+
     def _init_path(self) -> None:
         """
         Choose a path from the source coordinate to the destination coordinate.
@@ -62,9 +65,6 @@ class Car:
     def update_current_location(self) -> None:
         if self._current_location_index < len(self._path) - 1:
             self._current_location_index += 1
-
-        if self._current_location_index == len(self._path) - 1:
-            self._did_arrive = True
 
     def reset(self):
         self._did_arrive = False
