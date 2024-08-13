@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABC
 
 import numpy as np
-from typing import List
+from typing import List, Dict
 from City import City
 from Reporter import Reporter
 
@@ -46,6 +46,7 @@ class Solver(ABC):
         waiting_cars_penalty = 0
         all_cars_arrive_time = 0
         moving_cars_amount = 0
+        total_wait_time_punishment = 0
         for city in cities:
             for t in range(self.t):
                 city.update_city(solution[t], debug)
@@ -53,6 +54,8 @@ class Solver(ABC):
             total_avg_wait_time += city.get_current_avg_wait_time()
             waiting_cars_penalty += city.active_cars_amount() * NOT_REACHING_DEST_PENALTY
             moving_cars_amount += city.get_total_cars_movements()
+            total_wait_time_punishment += self.get_wait_time_punishment(city)
+
             if city.all_cars_arrived_time < self.t:
                 all_cars_arrive_time += (self.t - city.all_cars_arrived_time)
 
@@ -67,3 +70,20 @@ class Solver(ABC):
 
     def avg_wait_time(self, cities_amount: int, total_avg_wait_time: float):
         return total_avg_wait_time / cities_amount
+
+    def get_wait_time_punishment(self, city: City) -> float:
+        wait_times = city.get_all_junctions_wait_time()
+        total_punishment = 0
+        for row_wait_times in wait_times:
+            for wait_time in row_wait_times:
+                total_punishment += self.get_junction_wait_time_punishment(wait_time)
+
+        return total_punishment
+
+    def get_junction_wait_time_punishment(self, wait_time: Dict[str, int]) -> float:
+        total = 0;
+        for time in wait_time.values():
+            total += time ** 2
+
+        return total
+

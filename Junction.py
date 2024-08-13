@@ -49,6 +49,9 @@ class Junction:
         for car in cars:
             self.add_car(car)
 
+    def get_cars_wait_time(self) -> Dict[str, int]:
+        return self.cars_wait_time
+
     def get_avg_wait_time(self) -> float:
         """Calculate and return the average wait time of cars in the junction."""
         if not self.cars_wait_time:
