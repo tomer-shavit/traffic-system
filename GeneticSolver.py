@@ -99,12 +99,11 @@ class GeneticSolver(Solver):
         Returns:
         - np.ndarray: Scaled fitness scores.
         """
-        return self.scaling_base ** (-fitness_scores)  # Minimize fitness -> maximize scaled fitness
+        return self.scaling_base ** fitness_scores
 
     def select_parents(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
         """
         Selects parent solutions for the next generation using a fitness-proportionate selection method.
-        This version uses exponential scaling to enhance the selection pressure.
 
         Parameters:
         - population (np.ndarray): The current population of solutions.
