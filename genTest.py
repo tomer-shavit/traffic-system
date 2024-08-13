@@ -4,8 +4,8 @@ from GeneticSolver import GeneticSolver
 from Reporter import Reporter
 
 population_size = 200
-n = 10
-m = 10
+n = 6
+m = 6
 t = 30
 
 mutation_rate = 0.005

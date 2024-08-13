@@ -5,9 +5,9 @@ from City import City
 from Reporter import Reporter
 
 population_size = 100
-n = 10
-m = 10
-t = 40
+n = 6
+m = 6
+t = 30
 
 num_cities = 10
 num_cars = 200

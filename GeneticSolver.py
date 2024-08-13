@@ -130,10 +130,8 @@ class GeneticSolver(Solver):
         - np.ndarray: The best solution found after all generations.
         """
         population = self.initialize_population()
-        cities = []
+        cities = self.generate_cities_for_generation(num_cities, num_cars)
         for generation in range(self.generations):
-            cities.clear()
-            cities = self.generate_cities_for_generation(num_cities, num_cars)
             fitness_scores = self.evaluate_population(population, cities)
             best_solution, best_fitness = self.find_best_solution(population, fitness_scores)
 
