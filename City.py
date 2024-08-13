@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 from numpy import ndarray
 from Car import Car
 from TrafficLight import TrafficLight
@@ -208,3 +208,6 @@ class City:
 
     def get_total_cars_movements(self):
         return self.grid.total_car_movements
+
+    def get_all_junctions_wait_time(self) -> List[List[Dict[str, int]]]:
+        return self.grid.get_all_junctions_wait_time()

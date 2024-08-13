@@ -65,6 +65,9 @@ class Grid:
             self.junctions[new_coordinate.x][new_coordinate.y].add_car(car)
             car.update_current_location()
 
+    def get_all_junctions_wait_time(self) -> List[List[Dict[str, int]]]:
+        return [[junction.get_cars_wait_time() for junction in junctions] for junctions in self.junctions]
+
     def get_total_avg_wait_time(self) -> float:
         """Calculate the average wait time across all unique cars in all junctions."""
         return sum([sum([junction.get_avg_wait_time() for junction in junctions]) for junctions in
