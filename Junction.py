@@ -34,13 +34,15 @@ class Junction:
         and the list of cars that can move.
         """
         current_direction = self.traffic_light.get_current_direction()
-        cars_to_move = [car for car in self.cars.values() if car.current_direction() == current_direction]
-        cars_to_move = cars_to_move[:self.car_limit]
+        cars_in_current_direction = [car for car in self.cars.values() if car.current_direction() == current_direction]
+
+        # cars_in_current_direction.sort(key=lambda car: self.cars_wait_time[car.id], reverse=True)
+        cars_in_current_direction = cars_in_current_direction[:self.car_limit]
 
         for car_id, car in self.cars.items():
             self.cars_wait_time[car_id] += 1
 
-        return current_direction, cars_to_move
+        return current_direction, cars_in_current_direction
 
     def add_cars(self, cars: List[Car]) -> None:
         """Add multiple cars to the junction."""
