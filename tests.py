@@ -39,7 +39,7 @@ if __name__ == "__main__":
     print_path(city)
     print("###### Test 1: ######")
     print(f"m = {m}, n = {n}, num_cars = {num_cars}:\n")
-    while 0 != city.driving_cars_amount():
+    while 0 != city.active_cars_amount():
         rand_traffic = np.random.choice(list(Direction), size=(n, m))
         city.update_city(rand_traffic, True)
         print("###### next step: ######")

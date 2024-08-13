@@ -134,7 +134,7 @@ class City:
                         print("     ", end="")
                 print()
 
-    def driving_cars_amount(self) -> int:
+    def active_cars_amount(self) -> int:
         return self.num_of_active_cars
 
     def generate_state(self) -> Grid:
@@ -205,3 +205,6 @@ class City:
     def update_cars_arrival_time(self):
         if self.num_of_active_cars == 0 and self.all_cars_arrived_time > self.time:
             self.all_cars_arrived_time = self.time
+
+    def get_total_cars_movements(self):
+        return self.grid.total_car_movements

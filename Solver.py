@@ -45,17 +45,18 @@ class Solver(ABC):
         total_avg_wait_time = 0
         waiting_cars_penalty = 0
         all_cars_arrive_time = 0
+        moving_cars_amount = 0
         for city in cities:
             for t in range(self.t):
                 city.update_city(solution[t], debug)
 
             total_avg_wait_time += city.get_current_avg_wait_time()
-            waiting_cars_penalty += city.driving_cars_amount() * NOT_REACHING_DEST_PENALTY
-            waiting_cars_penalty += city.driving_cars_amount()
+            waiting_cars_penalty += city.active_cars_amount() * NOT_REACHING_DEST_PENALTY
+            moving_cars_amount += city.get_total_cars_movements()
             if city.all_cars_arrived_time < self.t:
                 all_cars_arrive_time += (self.t - city.all_cars_arrived_time)
-            self.reporter.record_all_cars_arrive(city.all_cars_arrived_time)
 
+            self.reporter.record_all_cars_arrive(city.all_cars_arrived_time)
             city.reset_city()
 
         return self.avg_wait_time(len(cities), total_avg_wait_time) + \
