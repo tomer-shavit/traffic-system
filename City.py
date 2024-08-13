@@ -14,6 +14,7 @@ MIN_TIME_TO_START = 0
 
 INF_INT = 10000
 
+
 class City:
     def __init__(self, n: int, m: int, num_cars: int, residential_coords: List[Coordinate],
                  industrial_coords: List[Coordinate]):
@@ -27,9 +28,8 @@ class City:
         self.traffic_system = self.init_traffic_system(self.traffic_lights)
         self.n = n
         self.m = m
-        self.num_of_driving_cars = len(self.cars)
+        self.num_of_active_cars = len(self.cars)
         self.all_cars_arrived_time: int = INF_INT
-
 
     def init_cars(self, amount: int):
         """Initialize a specified number of cars."""
@@ -39,7 +39,7 @@ class City:
         """Initialize a single car with random source, destination, and departure time."""
         source = self.get_random_location(self.residential_coords)
         dest = self.get_random_location(self.industrial_coords)
-        departure_time = self.get_normal_departure_time(MAX_TIME_TO_START/2, MAX_TIME_TO_START/2)
+        departure_time = self.get_normal_departure_time(MAX_TIME_TO_START / 2, MAX_TIME_TO_START / 2)
         return Car(f"Car_{car_num}", source, dest, departure_time, self.grid.allow_directions)
 
     def get_normal_departure_time(self, mean: float, std_dev: float) -> int:
@@ -135,7 +135,7 @@ class City:
                 print()
 
     def driving_cars_amount(self) -> int:
-        return self.num_of_driving_cars
+        return self.num_of_active_cars
 
     def generate_state(self) -> Grid:
         """Generate the current state of the city."""
@@ -190,19 +190,18 @@ class City:
         self.grid.reset()
         self.time = 0
         self.all_cars_arrived_time = INF_INT
-        self.num_of_driving_cars = len(self.cars)
+        self.num_of_active_cars = len(self.cars)
 
     def remove_cars_from_grid(self):
         for car in self.cars:
             if car.current_location == car.destination and not car.get_did_arrive():
                 self.grid.junctions[car.destination.x][car.destination.y].remove_car(car)
-                self.num_of_driving_cars -= 1
+                self.num_of_active_cars -= 1
 
     def reset_cars(self) -> None:
         for car in self.cars:
             car.reset()
 
     def update_cars_arrival_time(self):
-        if self.num_of_driving_cars == 0 and self.all_cars_arrived_time > self.time:
+        if self.num_of_active_cars == 0 and self.all_cars_arrived_time > self.time:
             self.all_cars_arrived_time = self.time
-
