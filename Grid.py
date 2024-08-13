@@ -41,6 +41,7 @@ class Grid:
         for junctions in self.junctions:
             for junction in junctions:
                 junction.reset()
+        self.total_car_movements = 0
 
     def update_grid(self) -> None:
         """Update the state of all junctions in the grid and move cars."""

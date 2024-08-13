@@ -14,7 +14,7 @@ class GeneticSolver(Solver):
     """
 
     def __init__(self, population_size: int, mutation_rate: float, generations: int, n: int, m: int, t: int,
-                 reporter: Reporter, scaling_base: float = 1.1):
+                 reporter: Reporter, temperature: float = 0.001):
         """
         Initializes the GeneticSolver with the necessary parameters.
         - population_size (int): The number of solutions in each generation's population.
@@ -25,7 +25,7 @@ class GeneticSolver(Solver):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.generations = generations
-        self.scaling_base = scaling_base
+        self.temperature = temperature
 
     def generate_random_solution(self) -> np.ndarray:
         """
@@ -89,7 +89,7 @@ class GeneticSolver(Solver):
 
         return children
 
-    def exponential_scaling(self, fitness_scores: np.ndarray) -> np.ndarray:
+    def scale_fitness(self, fitness_scores: np.ndarray) -> np.ndarray:
         """
         Applies exponential scaling to the fitness scores to amplify differences between them.
 
@@ -99,7 +99,11 @@ class GeneticSolver(Solver):
         Returns:
         - np.ndarray: Scaled fitness scores.
         """
-        return self.scaling_base ** fitness_scores
+        min_fitness = np.min(fitness_scores)
+        shifted_fitness = fitness_scores - min_fitness
+        scaled_fitness = np.exp(shifted_fitness / self.temperature)
+        return scaled_fitness / sum(scaled_fitness)
+        # return fitness_scores / sum(fitness_scores)
 
     def select_parents(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
         """
@@ -112,8 +116,7 @@ class GeneticSolver(Solver):
         Returns:
         - np.ndarray: The selected parent solutions.
         """
-        scaled_fitness = self.exponential_scaling(fitness_scores)
-        probabilities = scaled_fitness / np.sum(scaled_fitness)
+        probabilities = self.scale_fitness(fitness_scores)
         parent_indices = np.random.choice(len(population), size=self.population_size, p=probabilities)
         return population[parent_indices]
 
@@ -163,7 +166,7 @@ class GeneticSolver(Solver):
 
     def find_best_solution(self, population: np.ndarray, fitness_scores: np.ndarray) -> tuple:
         """Finds the best solution and its fitness in the current population."""
-        best_index = np.argmin(fitness_scores)
+        best_index = np.argmax(fitness_scores)
         return population[best_index], fitness_scores[best_index]
 
     def update_population_with_best(self, children: np.ndarray, best_solution: np.ndarray,

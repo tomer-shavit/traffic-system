@@ -10,7 +10,7 @@ t = 30
 
 mutation_rate = 0.005
 generations = 200
-scaling_base = 1.1
+temperature = 0.001
 
 num_cities = 10
 num_cars = 200
