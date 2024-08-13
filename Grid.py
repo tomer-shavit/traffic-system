@@ -20,6 +20,7 @@ class Grid:
             [START_HIGH_WAY, self.m - END_REFERENCE_HIGHWAY], self.n - GAP_HIGH_WAY))
         self.horizontal_junctions: List[Coordinate] = (self.init_horizontal_junctions(
                 [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
+        self.total_car_movements = 0
 
     def reset(self):
         for junctions in self.junctions:
@@ -35,6 +36,7 @@ class Grid:
             for j in range(self.m):
                 junction = self.junctions[i][j]
                 direction, moving_cars = junction.resolve_moving_cars()
+                self.total_car_movements += len(moving_cars)
 
                 for car in moving_cars:
                     if direction == Direction.VERTICAL and i < self.n - 1:
@@ -100,4 +102,3 @@ class Grid:
         if coordinate in self.horizontal_junctions:
             return [Direction.HORIZONTAL]
         return [Direction.VERTICAL, Direction.HORIZONTAL]
-
