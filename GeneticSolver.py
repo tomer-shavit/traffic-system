@@ -6,6 +6,7 @@ from Direction import Direction
 from Reporter import Reporter
 from Solver import Solver
 
+
 class GeneticSolver(Solver):
     """
     GeneticSolver is a class that implements a genetic algorithm to optimize traffic light configurations in a city grid.
@@ -13,7 +14,7 @@ class GeneticSolver(Solver):
     """
 
     def __init__(self, population_size: int, mutation_rate: float, generations: int, n: int, m: int, t: int,
-                 reporter: Reporter):
+                 reporter: Reporter, scaling_base: float = 1.1):
         """
         Initializes the GeneticSolver with the necessary parameters.
         - population_size (int): The number of solutions in each generation's population.
@@ -24,7 +25,7 @@ class GeneticSolver(Solver):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.generations = generations
-
+        self.scaling_base = scaling_base
 
     def generate_random_solution(self) -> np.ndarray:
         """
@@ -88,9 +89,22 @@ class GeneticSolver(Solver):
 
         return children
 
+    def exponential_scaling(self, fitness_scores: np.ndarray) -> np.ndarray:
+        """
+        Applies exponential scaling to the fitness scores to amplify differences between them.
+
+        Parameters:
+        - fitness_scores (np.ndarray): The fitness scores of the population.
+
+        Returns:
+        - np.ndarray: Scaled fitness scores.
+        """
+        return self.scaling_base ** (-fitness_scores)  # Minimize fitness -> maximize scaled fitness
+
     def select_parents(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
         """
         Selects parent solutions for the next generation using a fitness-proportionate selection method.
+        This version uses exponential scaling to enhance the selection pressure.
 
         Parameters:
         - population (np.ndarray): The current population of solutions.
@@ -99,8 +113,8 @@ class GeneticSolver(Solver):
         Returns:
         - np.ndarray: The selected parent solutions.
         """
-        inverse_fitness = 1 / fitness_scores
-        probabilities = inverse_fitness / np.sum(inverse_fitness)
+        scaled_fitness = self.exponential_scaling(fitness_scores)
+        probabilities = scaled_fitness / np.sum(scaled_fitness)
         parent_indices = np.random.choice(len(population), size=self.population_size, p=probabilities)
         return population[parent_indices]
 
