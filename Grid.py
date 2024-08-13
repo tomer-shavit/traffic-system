@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Dict
 
 from Coordinate import Coordinate
 from Junction import Junction
@@ -8,19 +8,34 @@ from Car import Car
 START_HIGH_WAY = 2
 END_REFERENCE_HIGHWAY = 3
 GAP_HIGH_WAY = 4
+REGULAR_JUNCTION_LIMIT = 10
+HIGHWAY_JUNCTION_LIMIT = 20
+
 
 class Grid:
     def __init__(self, traffic_lights: List[List[TrafficLight]]):
         self.n = len(traffic_lights)
         self.m = len(traffic_lights[0])
-        self.junctions: List[List[Junction]] = [
-            [Junction(traffic_lights[i][j]) for j in range(self.m)] for i in range(self.n)
-        ]
         self.vertical_junctions: List[Coordinate] = (self.init_vertical_junctions(
             [START_HIGH_WAY, self.m - END_REFERENCE_HIGHWAY], self.n - GAP_HIGH_WAY))
         self.horizontal_junctions: List[Coordinate] = (self.init_horizontal_junctions(
-                [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
+            [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
+        self.junctions: List[List[Junction]] = self.init_junctions(traffic_lights)
         self.total_car_movements = 0
+
+    def init_junctions(self, traffic_lights):
+        return [
+            [
+                Junction(
+                    traffic_lights[i][j],
+                    HIGHWAY_JUNCTION_LIMIT if Coordinate(i, j) in self.vertical_junctions or
+                                              Coordinate(i, j) in self.horizontal_junctions
+                    else REGULAR_JUNCTION_LIMIT
+                )
+                for j in range(self.m)
+            ]
+            for i in range(self.n)
+        ]
 
     def reset(self):
         for junctions in self.junctions:
