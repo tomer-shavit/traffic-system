@@ -2,6 +2,10 @@ from City import City
 from Coordinate import Coordinate
 import numpy as np
 from Direction import Direction
+import matplotlib.pyplot as plt
+import numpy as np
+
+
 
 
 def print_path(city: City):
@@ -27,21 +31,81 @@ def print_path(city: City):
             print(' '.join(row))
         print("\n" + "-" * (2 * city.m - 1) + "\n")
 
+def plot_result():
+
+    # Step 1: Read the data from the .txt file
+    file_path = './genetic_result_2'
+    generations = []
+    fitness_values = []
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            # Extract the generation number and fitness value
+            if line == '\n':
+                break
+            parts = line.split(': Best fitness = ')
+            generation = int(parts[0].split(' ')[1])
+            fitness = float(parts[1])
+
+            # Append to the lists
+            generations.append(generation)
+            fitness_values.append(fitness)
+
+    # Step 2: Plot the data
+    max_fitness = max(fitness_values)
+    # Step 2: Plot the data with smaller markers
+    plt.plot(generations, fitness_values, marker='o', markersize=2, label='Genetic Algorithm')
+
+    # Step 3: Draw a red horizontal line at y = 2.6062604
+    baseline_value = 2.6062604
+    plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+
+
+    # Optional: Add a legend to explain the red line
+    plt.legend()
+
+    # Step 4: Add titles and labels
+    plt.title('Best Fitness Over Generations - High Mutation Rate')
+    plt.xlabel('Generation')
+    plt.ylabel('Best Fitness Score')
+    plt.grid(True)
+
+    # Show the plot
+    plt.show()
+
+def load_data():
+    # Load the data from the .npy files
+    wait_times = np.load('./ReporterData/wait_times.npy')
+    all_cars_arrive_time = np.load('./ReporterData/all_cars_arrive_time.npy')
+    not_reaching_cars = np.load('./ReporterData/not_reaching_cars.npy')
+    moving_cars_amount = np.load('./ReporterData/moving_cars_amount.npy')
+    wait_time_punishment = np.load('./ReporterData/wait_time_punishment.npy')
+    best_solutions = np.load('./ReporterData/best_solutions.npy', allow_pickle=True)
+
+    # Example: Accessing and printing the data
+    print(wait_times)
+    print(all_cars_arrive_time)
+    print(not_reaching_cars)
+    print(moving_cars_amount)
+    print(wait_time_punishment)
+    print(best_solutions)
 
 
 
 if __name__ == "__main__":
+    load_data()
+    # plot_result()
     m = 12
     n = 12
     num_cars = 20
 
-    city = City.generate_city(n, m, num_cars)
-    print_path(city)
-    print("###### Test 1: ######")
-    print(f"m = {m}, n = {n}, num_cars = {num_cars}:\n")
-    while 0 != city.active_cars_amount():
-        rand_traffic = np.random.choice(list(Direction), size=(n, m))
-        city.update_city(rand_traffic, True)
-        print("###### next step: ######")
-        print(f"waiting time: {city.get_current_avg_wait_time()}")
-    print("\n\n")
+    # city = City.generate_city(n, m, num_cars)
+    # print_path(city)
+    # print("###### Test 1: ######")
+    # print(f"m = {m}, n = {n}, num_cars = {num_cars}:\n")
+    # while 0 != city.active_cars_amount():
+    #     rand_traffic = np.random.choice(list(Direction), size=(n, m))
+    #     city.update_city(rand_traffic, True)
+    #     print("###### next step: ######")
+    #     print(f"waiting time: {city.get_current_avg_wait_time()}")
+    # print("\n\n")

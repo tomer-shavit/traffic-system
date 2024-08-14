@@ -7,7 +7,7 @@ from TrafficSystem import TrafficSystem, Direction
 import random
 from Coordinate import Coordinate
 
-INDUSTRIAL_SIZE = 1
+INDUSTRIAL_SIZE = 2
 RESIDENTIAL_SIZE = 2
 MAX_TIME_TO_START = 4
 MIN_TIME_TO_START = 0

@@ -33,7 +33,7 @@ class Solver(ABC):
         """
         pass
 
-    def evaluate_solution(self, solution: np.ndarray, cities: List[City], debug: bool = False) -> float:
+    def evaluate_solution(self, solution: np.ndarray, cities: List[City], report: bool = False) -> float:
         """
         Evaluates a solution by simulating it across multiple city scenarios and calculating the average waiting
         time for cars.
@@ -51,7 +51,7 @@ class Solver(ABC):
         total_wait_time_punishment = 0
         for city in cities:
             for t in range(self.t):
-                city.update_city(solution[t], debug)
+                city.update_city(solution[t], False)
 
             total_avg_wait_time += city.get_current_avg_wait_time()
             not_reaching_cars += city.active_cars_amount()
@@ -61,15 +61,10 @@ class Solver(ABC):
             self.reporter.record_all_cars_arrive(city.all_cars_arrived_time)
             city.reset_city()
 
-        normalized_not_reaching_cars = self.normalize_not_reaching_cars(not_reaching_cars, cities)
-        normalized_total_avg_wait_time = self.normalize_avg_wait_time(total_avg_wait_time, cities)
-        normalized_moving_cars_amount = self.normalize_moving_cars_amount(moving_cars_amount, cities)
-        normalized_total_wait_time_punishment = self.normalize_wait_time_punishment(total_wait_time_punishment, cities)
-
-        score_not_reaching = 1 / (1 + normalized_not_reaching_cars)
-        score_avg_wait_time = 1 / (1 + normalized_total_avg_wait_time)
-        score_moving_cars = normalized_moving_cars_amount
-        score_wait_time_punishment = 1 / (1 + normalized_total_wait_time_punishment)
+        score_not_reaching = self.normalize_not_reaching_cars(not_reaching_cars, cities, report)
+        score_avg_wait_time = self.normalize_avg_wait_time(total_avg_wait_time, cities, report)
+        score_moving_cars = self.normalize_moving_cars_amount(moving_cars_amount, cities, report)
+        score_wait_time_punishment = self.normalize_wait_time_punishment(total_wait_time_punishment, cities, report)
 
         return (score_not_reaching * NOT_REACHING +
                 score_avg_wait_time * AVG_WAIT_TIME +
@@ -82,28 +77,37 @@ class Solver(ABC):
         for row_wait_times in wait_times:
             for wait_time in row_wait_times:
                 total_punishment += self.get_junction_wait_time_punishment(wait_time)
-
         return total_punishment
 
     def get_junction_wait_time_punishment(self, wait_time: Dict[str, int]) -> float:
         total = 0
         for time in wait_time.values():
             total += time ** 2
-
         return total
 
-    def normalize_not_reaching_cars(self, not_reaching_cars, cities: List[City]) -> float:
+    def normalize_not_reaching_cars(self, not_reaching_cars, cities: List[City], report: bool) -> float:
+        if report:
+            self.reporter.record_not_reaching_cars(not_reaching_cars / len(cities))
         max_cars = len(cities[0].cars) * len(cities)
-        return not_reaching_cars / max_cars
+        normalized_not_reaching_cars = not_reaching_cars / max_cars
+        return 1 / (1 + normalized_not_reaching_cars)
 
-    def normalize_avg_wait_time(self, total_avg_wait_time, cities: List[City]) -> float:
+    def normalize_avg_wait_time(self, total_avg_wait_time, cities: List[City], report: bool) -> float:
+        if report:
+            self.reporter.record_avg_wait_time(total_avg_wait_time / len(cities))
         max_waiting_cars = self.t * len(cities[0].cars) * len(cities) / (self.m * self.n)
-        return total_avg_wait_time / max_waiting_cars
+        normalized_total_avg_wait_time = total_avg_wait_time / max_waiting_cars
+        return 1 / (1 + normalized_total_avg_wait_time)
 
-    def normalize_moving_cars_amount(self, moving_cars_amount, cities: List[City]) -> float:
+    def normalize_moving_cars_amount(self, moving_cars_amount, cities: List[City], report: bool) -> float:
+        if report:
+            self.reporter.record_moving_cars(moving_cars_amount / len(cities))
         max_moving_cars = len(cities) * len(cities[0].cars) * self.t
         return moving_cars_amount / max_moving_cars
 
-    def normalize_wait_time_punishment(self, wait_time_punishment, cities: List[City]) -> float:
-        max = (self.t * len(cities[0].cars) * len(cities)) ** 2
-        return wait_time_punishment / max
+    def normalize_wait_time_punishment(self, wait_time_punishment, cities: List[City], report: bool) -> float:
+        if report:
+            self.reporter.record_wait_punishment(wait_time_punishment / len(cities))
+        max_punishment = (self.t * len(cities[0].cars) * len(cities)) ** 2
+        normalized_total_wait_time_punishment = wait_time_punishment / max_punishment
+        return 1 / (1 + normalized_total_wait_time_punishment)
