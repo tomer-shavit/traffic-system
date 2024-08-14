@@ -177,7 +177,7 @@ class GeneticSolver(Solver):
                                     fitness_scores: np.ndarray) -> np.ndarray:
         """Updates the population by replacing the worst solution with the best solution
          from the previous generation."""
-        worst_index = np.argmax(fitness_scores)
+        worst_index = np.argmin(fitness_scores)
         return np.concatenate(
             (children[:worst_index], children[worst_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
 

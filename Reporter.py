@@ -80,12 +80,13 @@ class Reporter:
 
     def save_all_data(self, directory):
         # Save each array to a separate file in the specified directory
-        np.save(f'{directory}/wait_times.npy', self.wait_times)
-        np.save(f'{directory}/all_cars_arrive_time.npy', self.all_cars_arrive_time)
-        np.save(f'{directory}/not_reaching_cars.npy', self.not_reaching_cars)
-        np.save(f'{directory}/moving_cars_amount.npy', self.moving_cars_amount)
-        np.save(f'{directory}/wait_time_punishment.npy', self.wait_time_punishment)
-        np.save(f'{directory}/best_solutions.npy', self.best_solutions, allow_pickle=True)
+        id = random.randint(0, 1000)
+        np.save(f'{directory}/wait_times{id}.npy', self.wait_times)
+        np.save(f'{directory}/all_cars_arrive_time{id}.npy', self.all_cars_arrive_time)
+        np.save(f'{directory}/not_reaching_cars{id}.npy', self.not_reaching_cars)
+        np.save(f'{directory}/moving_cars_amount{id}.npy', self.moving_cars_amount)
+        np.save(f'{directory}/wait_time_punishment{id}.npy', self.wait_time_punishment)
+        np.save(f'{directory}/best_solutions{id}.npy', self.best_solutions, allow_pickle=True)
 
     def record_vehicle_arrival(self, vehicle_id: str, junction_id: Coordinate):
         record = np.array([(
