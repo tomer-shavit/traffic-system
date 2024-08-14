@@ -143,6 +143,7 @@ class GeneticSolver(Solver):
             parents = self.select_parents(population, fitness_scores)
             children = self.create_children(parents)
             population = self.update_population_with_best(children, best_solution, fitness_scores)
+            self.report_best_solution(best_solution,cities)
             self.reporter.record_generations_best_solutions(best_fitness, best_solution)
 
         best_final_solution, best_final_fitness = self.find_best_solution(population, fitness_scores)
@@ -151,6 +152,9 @@ class GeneticSolver(Solver):
         print(f"Final Best Fitness: {best_final_fitness}")
 
         return best_final_solution
+
+    def report_best_solution(self, best_solution, cities):
+        self.evaluate_solution(best_solution, cities, report=True)
 
     def initialize_population(self) -> np.ndarray:
         """Initializes the population with random solutions."""
