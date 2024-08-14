@@ -1,4 +1,6 @@
 from typing import List, Dict
+
+import numpy as np
 from numpy import ndarray
 from Car import Car
 from TrafficLight import TrafficLight
@@ -211,3 +213,25 @@ class City:
 
     def get_all_junctions_wait_time(self) -> List[List[Dict[str, int]]]:
         return self.grid.get_all_junctions_wait_time()
+
+    def generate_state(self, top_left:Coordinate, top_right:Coordinate, bottom_left:Coordinate):
+        rows = bottom_left.x - top_left.x + 1
+        cols = top_right.y - top_left.y + 1
+
+        # The array will have 4 channels: [#V, #H, isV, isH]
+        state = np.zeros((rows, cols, 4), dtype=int)
+        for i in range(top_left.x, bottom_left.x + 1):
+            for j in range(top_left.y, top_right.y + 1):
+                is_vertical = 0
+                is_horizontal = 0
+                if Coordinate(i, j) in self.grid.vertical_junctions:
+                    is_vertical = 1
+                if Coordinate(i, j) in self.grid.horizontal_junctions:
+                    is_horizontal = 1
+                junction = self.grid.junctions[i][j]
+                vertical_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
+                horizontal_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+
+                state[i - top_left.x, j - top_left.y] = [vertical_cars, horizontal_cars, is_vertical, is_horizontal]
+
+        return state

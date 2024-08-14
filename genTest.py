@@ -9,9 +9,8 @@ n = 8
 m = 8
 t = 40
 
-
-mutation_rate = 0.01
-generations = 200
+mutation_rate = 0.015
+generations = 150
 temperature = 0.001
 
 num_cities = 10
