@@ -24,8 +24,8 @@ class Agent:
         self.critic = CriticNetwork(input_dims, alpha)
         self.memory = PPOMemory(batch_size)
 
-    def remember(self, state, action, probs, vals, reward, done):
-        self.remember(state, action, probs, vals, reward, done)
+    def remember(self, state, action, prob, val, reward, done):
+        self.memory.store_memory(state, action, prob, val, reward, done)
 
     def save_models(self):
         print("... Saving Models ...")
@@ -44,7 +44,7 @@ class Agent:
         action = dist.sample()
 
         probs = T.squeeze(dist.log_prob(action)).item()
-        action = T.squeeze(action).item()  # It assumes that action is a 1 dim value maybe need to change
+        action = T.squeeze(action).item()
         value = T.squeeze(value).item()
 
         return action, probs, value
