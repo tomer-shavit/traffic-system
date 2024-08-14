@@ -6,7 +6,7 @@ from Coordinate import Coordinate
 from Direction import Direction
 import random
 
-NOISE_CAR_PATH = 0.05
+NOISE_CAR_PATH = 0.03
 
 class Car:
     def __init__(self, car_id: str, source: Coordinate, destination: Coordinate, start_time: int,

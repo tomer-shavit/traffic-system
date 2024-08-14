@@ -3,7 +3,6 @@ from BaseLineSolver import BaseLineSolver
 from City import City
 from Reporter import Reporter
 
-population_size = 100
 n = 8
 m = 8
 t = 40
