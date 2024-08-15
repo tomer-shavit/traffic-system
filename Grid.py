@@ -16,20 +16,20 @@ class Grid:
     def __init__(self, traffic_lights: List[List[TrafficLight]]):
         self.n = len(traffic_lights)
         self.m = len(traffic_lights[0])
-        self.vertical_junctions: List[Coordinate] = (self.init_vertical_junctions(
+        self.vertical_highway_junctions: List[Coordinate] = (self.init_vertical_highway_junctions(
             [START_HIGH_WAY, self.m - END_REFERENCE_HIGHWAY], self.n - GAP_HIGH_WAY))
-        self.horizontal_junctions: List[Coordinate] = (self.init_horizontal_junctions(
+        self.horizontal_highway_junctions: List[Coordinate] = (self.init_horizontal_highway_junctions(
             [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
         self.junctions: List[List[Junction]] = self.init_junctions(traffic_lights)
         self.total_car_movements = 0
 
-    def init_junctions(self, traffic_lights):
+    def init_junctions(self, traffic_lights) -> List[List[Junction]]:
         return [
             [
                 Junction(
                     traffic_lights[i][j],
-                    HIGHWAY_JUNCTION_LIMIT if Coordinate(i, j) in self.vertical_junctions or
-                                              Coordinate(i, j) in self.horizontal_junctions
+                    HIGHWAY_JUNCTION_LIMIT if Coordinate(i, j) in self.vertical_highway_junctions or
+                                              Coordinate(i, j) in self.horizontal_highway_junctions
                     else REGULAR_JUNCTION_LIMIT
                 )
                 for j in range(self.m)
@@ -37,7 +37,7 @@ class Grid:
             for i in range(self.n)
         ]
 
-    def reset(self):
+    def reset(self) -> None:
         for junctions in self.junctions:
             for junction in junctions:
                 junction.reset()
@@ -85,7 +85,7 @@ class Grid:
         """Get the current state of all junctions in the grid."""
         pass  # TODO: fill this
 
-    def init_vertical_junctions(self, vertical_highways: List[int], width: int = 1) -> List[Coordinate]:
+    def init_vertical_highway_junctions(self, vertical_highways: List[int], width: int = 1) -> List[Coordinate]:
         """
         Initialize vertical highways by specifying which columns should have vertical highways.
         :param vertical_highways: List of column indices where vertical highways should be placed.
@@ -99,7 +99,7 @@ class Grid:
                 vertical_junctions.append(Coordinate(start_point + w, row))
         return vertical_junctions
 
-    def init_horizontal_junctions(self, horizontal_highways: List[int], width: int = 1) -> List[Coordinate]:
+    def init_horizontal_highway_junctions(self, horizontal_highways: List[int], width: int = 1) -> List[Coordinate]:
         """
         Initialize horizontal highways by specifying which rows should have horizontal highways.
         :param horizontal_highways: List of row indices where horizontal highways should be placed.
@@ -114,10 +114,10 @@ class Grid:
         return horizontal_junctions
 
     def allow_directions(self, coordinate: Coordinate) -> List[Direction]:
-        if coordinate in self.vertical_junctions:
-            if coordinate in self.horizontal_junctions:
+        if coordinate in self.vertical_highway_junctions:
+            if coordinate in self.horizontal_highway_junctions:
                 return [Direction.VERTICAL, Direction.HORIZONTAL]
             return [Direction.VERTICAL]
-        if coordinate in self.horizontal_junctions:
+        if coordinate in self.horizontal_highway_junctions:
             return [Direction.HORIZONTAL]
         return [Direction.VERTICAL, Direction.HORIZONTAL]

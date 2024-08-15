@@ -37,7 +37,7 @@ class Junction:
         cars_in_current_direction = [car for car in self.cars.values() if car.current_direction() == current_direction]
 
         cars_in_current_direction.sort(key=lambda car: self.cars_wait_time[car.id], reverse=True)
-        cars_in_current_direction = cars_in_current_direction[:self.car_limit]
+        cars_in_current_direction = cars_in_current_direction[:self.car_limit] # TODO: car limit in what direction?
 
         for car_id, car in self.cars.items():
             self.cars_wait_time[car_id] += 1
