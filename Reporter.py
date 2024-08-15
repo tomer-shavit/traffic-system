@@ -105,3 +105,6 @@ class Reporter:
         )], dtype=self.vehicle_counts.dtype)
         self.vehicle_counts = np.append(self.vehicle_counts, record)
 
+    def report_training_results(self, score_history, best_score):
+        pass
+
