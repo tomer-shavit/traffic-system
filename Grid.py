@@ -11,13 +11,21 @@ GAP_HIGH_WAY = 4
 
 
 class Grid:
-    def __init__(self, traffic_lights: List[List[TrafficLight]]):
+    def __init__(self, traffic_lights: List[List[TrafficLight]],
+                 vertical_highway_junctions: List[Coordinate] = None,
+                 horizontal_highway_junctions: List[Coordinate] = None):
         self.n = len(traffic_lights)
         self.m = len(traffic_lights[0])
-        self.vertical_highway_junctions: List[Coordinate] = (self.init_vertical_highway_junctions(
-            [START_HIGH_WAY, self.m - END_REFERENCE_HIGHWAY], self.n - GAP_HIGH_WAY))
-        self.horizontal_highway_junctions: List[Coordinate] = (self.init_horizontal_highway_junctions(
-            [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
+        if vertical_highway_junctions:
+            self.vertical_highway_junctions: List[Coordinate] = vertical_highway_junctions
+        else:
+            self.vertical_highway_junctions: List[Coordinate] = (self.init_vertical_highway_junctions(
+                [START_HIGH_WAY, self.m - END_REFERENCE_HIGHWAY], self.n - GAP_HIGH_WAY))
+        if horizontal_highway_junctions:
+            self.horizontal_highway_junctions: List[Coordinate] = horizontal_highway_junctions
+        else:
+            self.horizontal_highway_junctions: List[Coordinate] = (self.init_horizontal_highway_junctions(
+                [START_HIGH_WAY, self.n - END_REFERENCE_HIGHWAY], self.m - GAP_HIGH_WAY))
         self.junctions: List[List[Junction]] = self.init_junctions(traffic_lights)
         self.total_car_movements = 0
 

@@ -5,7 +5,7 @@ from Direction import Direction
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+from Reporter import Reporter
 
 
 def print_path(city: City):
@@ -90,11 +90,47 @@ def load_data():
     print(wait_time_punishment)
     print(best_solutions)
 
+def extract_subgrid(solution: np.ndarray, top_left: Coordinate, bottom_right: Coordinate) -> np.ndarray:
+    """
+    Extract a subgrid from the given solution matrix based on the neighborhood's coordinates.
+    """
+    return solution[top_left.x:bottom_right.x + 1, top_left.y:bottom_right.y + 1]
+
+def test_neighborhood():
+    n = 5
+    m = 5
+    num_cars = 10
+    t = 10
+    reporter = Reporter()
+    city = City.generate_city(n, m, num_cars)
+    baseline = BaseLineSolver(n, m, t, reporter)
+    solution = baseline.solve()
+    for _t in range(t):
+        city.update_city(solution[_t], True)
+        top_left = Coordinate(1,1)
+        top_right = Coordinate(1, 3)
+        bottom_right = Coordinate(3,3)
+        bottom_left = Coordinate(3, 1)
+        sub_solution = extract_subgrid(solution[_t], top_left, bottom_right)
+        neighborhood = city.get_neighborhood(top_left, top_right, bottom_left)
+        neighborhood.print(sub_solution)
+        if len(neighborhood.cars) > 0:
+            print("\n***** start update neighborhood test: ******")
+            for i in range(3):
+                sub_solution = extract_subgrid(solution[_t+i], top_left, bottom_right)
+                city.update_city(solution[_t+i], True)
+                neighborhood.update_neighborhood(sub_solution)
+                neighborhood.print(sub_solution)
+            break
+
+
+
 
 
 if __name__ == "__main__":
-    load_data()
+    # load_data()
     # plot_result()
+    test_neighborhood()
     m = 12
     n = 12
     num_cars = 20
