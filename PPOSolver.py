@@ -36,7 +36,8 @@ class PPOSolver(Solver):
         return NEIGHBORHOOD_M * NEIGHBORHOOD_M,
 
     def init_all_actions(self) -> List[np.ndarray]:
-        possible_combinations = list(product([Direction.HORIZONTAL, Direction.VERTICAL], repeat=9))
+        possible_combinations = list(product([Direction.HORIZONTAL, Direction.VERTICAL],
+                                             repeat=self.get_input_dims()[0]))
         return [np.array(combination) for combination in possible_combinations]
 
     def solve(self, city: City) -> np.ndarray:
