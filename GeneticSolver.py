@@ -103,7 +103,6 @@ class GeneticSolver(Solver):
         shifted_fitness = fitness_scores - min_fitness
         scaled_fitness = np.exp(shifted_fitness / self.temperature)
         return scaled_fitness / sum(scaled_fitness)
-        # return fitness_scores / sum(fitness_scores)
 
     def select_parents(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
         """
@@ -142,7 +141,7 @@ class GeneticSolver(Solver):
 
             parents = self.select_parents(population, fitness_scores)
             children = self.create_children(parents)
-            population = self.update_population_with_best(children, best_solution, fitness_scores)
+            population = self.add_best_to_children(children, best_solution)
             self.report_best_solution(best_solution,cities)
             self.reporter.record_generations_best_solutions(best_fitness, best_solution)
 
@@ -173,13 +172,11 @@ class GeneticSolver(Solver):
         best_index = np.argmax(fitness_scores)
         return population[best_index], fitness_scores[best_index]
 
-    def update_population_with_best(self, children: np.ndarray, best_solution: np.ndarray,
-                                    fitness_scores: np.ndarray) -> np.ndarray:
-        """Updates the population by replacing the worst solution with the best solution
-         from the previous generation."""
-        worst_index = np.argmax(fitness_scores)
+    def add_best_to_children(self, children: np.ndarray, best_solution: np.ndarray) -> np.ndarray:
+        """replace a random children with the best solution."""
+        random_index = np.random.randint(0, len(children))
         return np.concatenate(
-            (children[:worst_index], children[worst_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
+            (children[:random_index], children[random_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
 
     def plot_fitness_history(self):
         #TODO: ask Tomer what is self.fitness_history?

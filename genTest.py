@@ -4,17 +4,17 @@ from City import City
 from GeneticSolver import GeneticSolver
 from Reporter import Reporter
 
-population_size = 600
 n = 8
 m = 8
 t = 40
+num_cities = 10
+num_cars = 300
 
+population_size = 600
 mutation_rate = 0.015
 generations = 150
 temperature = 0.001
 
-num_cities = 10
-num_cars = 200
 reporter = Reporter()
 
 solver = GeneticSolver(population_size, mutation_rate, generations, n, m, t, reporter, temperature)
