@@ -314,6 +314,8 @@ class City:
         return self.grid.get_all_junctions_wait_time()
 
     def get_neighborhood(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> Neighborhood:
+        rows = bottom_left.x - top_left.x + 1
+        cols = top_right.y - top_left.y + 1
         copy_traffic_lights = [[TrafficLight() for _ in range(cols)] for _ in range(rows)]
         horizontal_highway_junctions, vertical_highway_junctions = self.get_highway_coordinates(bottom_left,
                                                                                                 copy_traffic_lights,

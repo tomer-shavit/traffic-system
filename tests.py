@@ -115,6 +115,7 @@ def test_neighborhood():
         sub_solution = extract_subgrid(solution[_t], top_left, bottom_right)
         neighborhood = city.get_neighborhood(top_left, top_right, bottom_left)
         neighborhood.print(sub_solution)
+        print(neighborhood.get_state())
         if len(neighborhood.cars) > 0:
             print("\n***** start update neighborhood test: ******")
             for i in range(3):
@@ -122,6 +123,7 @@ def test_neighborhood():
                 city.update_city(solution[_t+i], True)
                 neighborhood.update_neighborhood(sub_solution)
                 neighborhood.print(sub_solution)
+                print(neighborhood.get_state())
             break
 
 
