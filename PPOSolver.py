@@ -17,6 +17,7 @@ NEIGHBORHOOD_M = 3
 BATCH_SIZE = 128
 NUM_OF_EPOCHS = 5
 NUM_OF_SIMULATIONS = 6
+MAX_ITERATIONS = 100
 
 
 class PPOSolver(Solver):
@@ -38,17 +39,39 @@ class PPOSolver(Solver):
         possible_combinations = list(product([Direction.HORIZONTAL, Direction.VERTICAL], repeat=9))
         return [np.array(combination) for combination in possible_combinations]
 
-    def solve(self) -> np.ndarray:
-        pass
+    def solve(self, city: City) -> np.ndarray:
+        counter = 0
+        solution = []
 
-    def train(self, num_cities: int, num_cars: int, time_limit: int) -> None:
+        while city.active_cars_amount() != 0 and counter < MAX_ITERATIONS:
+            actions_for_current_tick = []
+
+            for i in range(self.n - NEIGHBORHOOD_N + 1):
+                for j in range(self.m - NEIGHBORHOOD_M + 1):
+                    top_left, top_right, bottom_left = self.build_neighborhood_coords(i, j)
+                    neighborhood = city.get_neighborhood(top_left, top_right, bottom_left)
+                    action, _, _ = self.agent.choose_action(neighborhood.get_state())
+                    actions_for_current_tick.append(action)
+
+            assignment = self.vote_on_assignment(actions_for_current_tick)
+            solution.append(assignment)
+            city.update_city(assignment)
+            counter += 1
+
+        if counter >= MAX_ITERATIONS:
+            raise RuntimeError(f"Max iteration reached and there are still: {city.active_cars_amount()} active cars.")
+
+        return np.array(solution)
+
+    def train(self, num_cities: int, num_cars: int) -> None:
         cities = City.generate_cities(self.n, self.m, num_cars, num_cities)
         score_history = []
         best_score = float('-inf')
 
         for city in cities:
             score = 0
-            for t in range(time_limit):
+            counter = 0
+            while city.active_cars_amount() != 0 and counter <= MAX_ITERATIONS:
                 actions_for_current_tick = []
                 for i in range(self.n - NEIGHBORHOOD_N + 1):
                     for j in range(self.m - NEIGHBORHOOD_M + 1):
@@ -57,6 +80,7 @@ class PPOSolver(Solver):
                 assignment = self.vote_on_assignment(actions_for_current_tick)
                 self.agent.learn()
                 city.update_city(assignment)
+                counter += 1
 
             score_history.append(score)
             avg_score = np.mean(score_history[-100:])
@@ -85,16 +109,13 @@ class PPOSolver(Solver):
         return bottom_left, top_left, top_right
 
     def vote_on_assignment(self, actions: List[int]) -> np.ndarray:
-        # Initialize the voting matrix with zeros, each cell has two counts: [horizontal_votes, vertical_votes]
         votes = np.zeros((self.n, self.m, 2), dtype=int)
 
-        # Iterate over the sliding window positions
         for i in range(self.n - NEIGHBORHOOD_N + 1):
             for j in range(self.m - NEIGHBORHOOD_M + 1):
                 action_idx = actions.pop(0)
                 action = self.all_actions[action_idx]
 
-                # Vote for each junction in the neighborhood
                 for ni in range(NEIGHBORHOOD_N):
                     for nj in range(NEIGHBORHOOD_M):
                         global_i = i + ni
@@ -105,19 +126,20 @@ class PPOSolver(Solver):
                         else:
                             votes[global_i][global_j][1] += 1
 
-        # Create the assignment array based on majority votes
-        assignment = np.empty((self.n, self.m), dtype=Direction)
+        return self.build_assignments(votes)
 
+    def build_assignments(self, votes: np.ndarray):
+        assignment = np.empty((self.n, self.m), dtype=Direction)
         for i in range(self.n):
             for j in range(self.m):
                 if votes[i][j][0] >= votes[i][j][1]:
                     assignment[i][j] = Direction.HORIZONTAL
                 else:
                     assignment[i][j] = Direction.VERTICAL
-
         return assignment
 
     def evaluate_neighborhood(self, action: int, neighborhood: Neighborhood, report: bool = False) -> Tuple[int, bool]:
+        # TODO: implement diminishing effect when calculating the reward
         for _ in range(NUM_OF_SIMULATIONS):
             neighborhood.update_neighborhood(self.all_actions[action])
 
