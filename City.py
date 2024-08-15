@@ -18,14 +18,20 @@ INF_INT = 10000
 
 class Neighborhood:
     def __init__(self, cars: List[Car], traffic_lights: List[List[TrafficLight]],
-                 grid: Grid, traffic_system: TrafficSystem):
+                 grid: Grid, traffic_system: TrafficSystem, shift_x: int, shift_y: int):
+
         self.original_num_of_cars = len(cars)
         self.cars: List[Car] = cars
         self.traffic_lights = traffic_lights
         self.traffic_system = traffic_system
         self.grid = grid
         self.cars = cars
+        self.shift_x = shift_x
+        self.shift_y = shift_y
         self.num_of_active_cars = len(self.cars)
+        self.n = len(self.grid.junctions)
+        self.m = len(self.grid.junctions[0])
+
 
     def get_state(self) -> ndarray:
         rows = len(self.grid.junctions)
@@ -63,6 +69,55 @@ class Neighborhood:
 
     def active_cars_amount(self) -> int:
         return self.num_of_active_cars
+
+    def print(self, assignment: ndarray):
+        """Print a visual representation of the City."""
+        print("-----------------------------------------------------------------------------")
+        print("Neighborhood layout:")
+        # ANSI color codes
+        GREEN = "\033[32m"
+        YELLOW = "\033[33m"
+        RESET = "\033[0m"
+
+        for i in range(self.n):
+            # Print junctions and horizontal connections
+            for j in range(self.m):
+                junction = self.grid.junctions[i][j]
+                light_direction = 'V' if assignment[i, j] == Direction.VERTICAL else 'H'
+                vertical_cars = sum(
+                    1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
+                horizontal_cars = sum(
+                    1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+
+                # Color the direction only if there are cars in the junction
+                total_cars = vertical_cars + horizontal_cars
+                if total_cars > 0:
+                    direction_color = GREEN if light_direction == 'V' else YELLOW
+                else:
+                    direction_color = ""
+
+                # Color the car counts, keeping zeros white
+                v_color = GREEN if vertical_cars > 0 else ""
+                h_color = YELLOW if horizontal_cars > 0 else ""
+
+                # Color coordinates based on type
+                coord_color = ""
+
+                print(
+                    f"[D:{direction_color}{light_direction}{RESET}, V:{v_color}{vertical_cars:2d}{RESET},"
+                    f" H:{h_color}{horizontal_cars:2d}{RESET}, {coord_color}(i:{i},j:{j}){RESET}]",
+                    end="")
+                if j < self.m - 1:
+                    print(" -- ", end="")
+            print()
+
+            # Print vertical connections
+            if i < self.n - 1:
+                for j in range(self.m):
+                    print("           |           ", end="")
+                    if j < self.m - 1:
+                        print("     ", end="")
+                print()
 
 
 class City:
@@ -259,26 +314,41 @@ class City:
         return self.grid.get_all_junctions_wait_time()
 
     def get_neighborhood(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> Neighborhood:
-        pass
+        copy_traffic_lights = [[TrafficLight() for _ in range(cols)] for _ in range(rows)]
+        horizontal_highway_junctions, vertical_highway_junctions = self.get_highway_coordinates(bottom_left,
+                                                                                                copy_traffic_lights,
+                                                                                                top_left, top_right)
 
-    def generate_state(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> np.ndarray:
-        rows = bottom_left.x - top_left.x + 1
-        cols = top_right.y - top_left.y + 1
+        copy_grid = Grid(copy_traffic_lights, vertical_highway_junctions, horizontal_highway_junctions)
+        copy_traffic_system = TrafficSystem(copy_traffic_lights)
 
-        # The array will have 4 channels: [#V, #H, isV, isH]
-        state = np.zeros((rows, cols, 4), dtype=int)
+        copy_cars = self.get_copy_cars(bottom_left, copy_grid, top_left, top_right)
+        return Neighborhood(copy_cars, copy_traffic_lights, copy_grid, copy_traffic_system, top_left.x, top_left.y)
+
+    def get_copy_cars(self, bottom_left, copy_grid, top_left, top_right):
+        copy_cars = []
         for i in range(top_left.x, bottom_left.x + 1):
             for j in range(top_left.y, top_right.y + 1):
-                is_vertical = 0
-                is_horizontal = 0
-                if Coordinate(i, j) in self.grid.vertical_highway_junctions:
-                    is_vertical = 1
-                if Coordinate(i, j) in self.grid.horizontal_highway_junctions:
-                    is_horizontal = 1
+                for real_car in self.grid.junctions[i][j].cars.values():
+                    copy_car = Car.copy_constructor(real_car)
+                    neighborhood_location = (
+                        Coordinate(copy_car.current_location.x - top_left.x, copy_car.current_location.y - top_left.y))
+                    copy_grid.add_car_to_junction(copy_car, neighborhood_location)
+                    copy_cars.append(copy_car)
+        return copy_cars
+
+    def get_highway_coordinates(self, bottom_left, copy_traffic_lights, top_left, top_right):
+        horizontal_highway_junctions = []
+        vertical_highway_junctions = []
+        shift_x = top_left.x
+        shift_y = top_left.y
+        for i in range(top_left.x, bottom_left.x + 1):
+            for j in range(top_left.y, top_right.y + 1):
                 junction = self.grid.junctions[i][j]
-                vertical_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
-                horizontal_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+                copy_traffic_lights[i-shift_x][j-shift_y].set_direction(self.traffic_lights[i][j].get_current_direction())
+                if junction.get_is_vertical_highway():
+                    vertical_highway_junctions.append(Coordinate(i - shift_x, j - shift_y))
+                if junction.get_is_horizontal_highway():
+                    horizontal_highway_junctions.append(Coordinate(i - shift_x, j - shift_y))
+        return horizontal_highway_junctions, vertical_highway_junctions
 
-                state[i - top_left.x, j - top_left.y] = [vertical_cars, horizontal_cars, is_vertical, is_horizontal]
-
-        return state
