@@ -3,13 +3,24 @@ from typing import Dict, List, Tuple
 from TrafficLight import TrafficLight, Direction
 from Car import Car
 
+REGULAR_JUNCTION_LIMIT = 10
+HIGHWAY_JUNCTION_LIMIT = 20
+
 
 class Junction:
-    def __init__(self, traffic_light: TrafficLight, car_limit: int):
+    def __init__(self, traffic_light: TrafficLight,
+                 is_horizontal_highway: bool, is_vertical_highway: bool):
         self.traffic_light = traffic_light
         self.cars: Dict[str, Car] = dict()
         self.cars_wait_time: Dict[str, int] = dict()
-        self.car_limit = car_limit
+        self.is_horizontal_highway = is_horizontal_highway
+        self.is_vertical_highway = is_vertical_highway
+
+    def get_is_horizontal_highway(self) -> bool:
+        return self.is_horizontal_highway
+
+    def get_is_vertical_highway(self) -> bool:
+        return self.is_vertical_highway
 
     def add_car(self, car: Car) -> None:
         """Add a single car to the junction."""
@@ -37,7 +48,12 @@ class Junction:
         cars_in_current_direction = [car for car in self.cars.values() if car.current_direction() == current_direction]
 
         cars_in_current_direction.sort(key=lambda car: self.cars_wait_time[car.id], reverse=True)
-        cars_in_current_direction = cars_in_current_direction[:self.car_limit]
+
+        if ((current_direction == Direction.HORIZONTAL and self.is_horizontal_highway) or
+                (current_direction == Direction.VERTICAL and self.is_vertical_highway)):
+            cars_in_current_direction = cars_in_current_direction[:HIGHWAY_JUNCTION_LIMIT]
+        else:
+            cars_in_current_direction = cars_in_current_direction[:REGULAR_JUNCTION_LIMIT]
 
         for car_id, car in self.cars.items():
             self.cars_wait_time[car_id] += 1

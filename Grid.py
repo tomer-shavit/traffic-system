@@ -8,8 +8,6 @@ from Car import Car
 START_HIGH_WAY = 2
 END_REFERENCE_HIGHWAY = 3
 GAP_HIGH_WAY = 4
-REGULAR_JUNCTION_LIMIT = 10
-HIGHWAY_JUNCTION_LIMIT = 20
 
 
 class Grid:
@@ -28,9 +26,8 @@ class Grid:
             [
                 Junction(
                     traffic_lights[i][j],
-                    HIGHWAY_JUNCTION_LIMIT if Coordinate(i, j) in self.vertical_junctions or
-                                              Coordinate(i, j) in self.horizontal_junctions
-                    else REGULAR_JUNCTION_LIMIT
+                    Coordinate(i, j) in self.horizontal_junctions,
+                    Coordinate(i, j) in self.vertical_junctions
                 )
                 for j in range(self.m)
             ]
