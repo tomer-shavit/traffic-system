@@ -1,3 +1,4 @@
+from BaseLineSolver import BaseLineSolver
 from City import City
 from Coordinate import Coordinate
 import numpy as np
