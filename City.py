@@ -16,6 +16,18 @@ MIN_TIME_TO_START = 0
 
 INF_INT = 10000
 
+class Neighborhood:
+    def __init__(self, junctions: ndarray, cars: List[Car]):
+        self.junctions = junctions
+#        self.traffic_system = TrafficSystem(traffic lights from the junction in the constructor)
+        self.cars = cars
+
+    def get_state(self) -> ndarray:
+        pass
+
+    def update_neighborhood(self) -> None:
+        pass
+
 
 class City:
     def __init__(self, n: int, m: int, num_cars: int, residential_coords: List[Coordinate],
@@ -139,10 +151,6 @@ class City:
     def active_cars_amount(self) -> int:
         return self.num_of_active_cars
 
-    def generate_state(self) -> Grid:
-        """Generate the current state of the city."""
-        pass
-
     @classmethod
     def generate_city(cls, n: int, m: int, num_cars: int) -> 'City':
         """
@@ -214,7 +222,10 @@ class City:
     def get_all_junctions_wait_time(self) -> List[List[Dict[str, int]]]:
         return self.grid.get_all_junctions_wait_time()
 
-    def generate_state(self, top_left:Coordinate, top_right:Coordinate, bottom_left:Coordinate):
+    def get_neighborhood(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> Neighborhood:
+        pass
+
+    def generate_state(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> np.ndarray:
         rows = bottom_left.x - top_left.x + 1
         cols = top_right.y - top_left.y + 1
 
@@ -224,9 +235,9 @@ class City:
             for j in range(top_left.y, top_right.y + 1):
                 is_vertical = 0
                 is_horizontal = 0
-                if Coordinate(i, j) in self.grid.vertical_junctions:
+                if Coordinate(i, j) in self.grid.vertical_highway_junctions:
                     is_vertical = 1
-                if Coordinate(i, j) in self.grid.horizontal_junctions:
+                if Coordinate(i, j) in self.grid.horizontal_highway_junctions:
                     is_horizontal = 1
                 junction = self.grid.junctions[i][j]
                 vertical_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
