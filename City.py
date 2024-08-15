@@ -51,7 +51,7 @@ class Neighborhood:
                 horizontal_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
 
                 state[i, j] = [vertical_cars, horizontal_cars, is_vertical, is_horizontal]
-        return state
+        return state.flatten()
 
     def update_neighborhood(self, assignment: np.ndarray) -> None:
         self.traffic_system.update_traffic_lights(assignment)
