@@ -6,9 +6,9 @@ from Reporter import Reporter
 n = 8
 m = 8
 t = 40
-
 num_cities = 10
-num_cars = 200
+num_cars = 300
+
 reporter = Reporter()
 solver = BaseLineSolver(n, m, t, reporter)
 solution = solver.solve()
@@ -18,7 +18,7 @@ print(f"Evaluation for baseline= {solver.evaluate_solution(solution, cities)}")
 
 city = City.generate_city(n, m, num_cars)
 for _t in range(t):
-    city.update_city(solution[_t], True)
+    city.update_city(solution[_t])
 
 #
 # plt.figure(figsize=(10, 6))
