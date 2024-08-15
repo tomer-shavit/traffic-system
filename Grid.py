@@ -26,8 +26,8 @@ class Grid:
             [
                 Junction(
                     traffic_lights[i][j],
-                    Coordinate(i, j) in self.vertical_highway_junctions,
-                    Coordinate(i, j) in self.horizontal_highway_junctions
+                    Coordinate(i, j) in self.horizontal_highway_junctions,
+                    Coordinate(i, j) in self.vertical_highway_junctions
                 )
                 for j in range(self.m)
             ]
