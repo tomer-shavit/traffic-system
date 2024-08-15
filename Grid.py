@@ -42,8 +42,30 @@ class Grid:
 
     def update_grid(self) -> None:
         """Update the state of all junctions in the grid and move cars."""
-        cars_to_move = []  # List to store cars that need to be moved
+        cars_to_move = self.get_cars_to_move()
+        # Now move the cars
+        for car, old_coordinate, new_coordinate in cars_to_move:
+            self.junctions[old_coordinate.x][old_coordinate.y].remove_car(car)
+            self.junctions[new_coordinate.x][new_coordinate.y].add_car(car)
+            car.update_current_location()
 
+    def update_sub_grid(self) -> None:
+        cars_to_move = self.get_cars_to_move()
+        for car, old_coordinate, new_coordinate in cars_to_move:
+            self.junctions[old_coordinate.x][old_coordinate.y].remove_car(car)
+            if self.out_of_grid(new_coordinate):
+                pass
+            else:
+                self.junctions[new_coordinate.x][new_coordinate.y].add_car(car)
+            car.update_current_location()
+
+    def out_of_grid(self, coordinate: Coordinate) -> bool:
+        if coordinate.x >= self.n or coordinate.y >= self.m:
+            return True
+        return False
+
+    def get_cars_to_move(self):
+        cars_to_move = []
         # First, update all junctions and collect cars that need to be moved
         for i in range(self.n):
             for j in range(self.m):
@@ -56,12 +78,7 @@ class Grid:
                         cars_to_move.append((car, Coordinate(i, j), Coordinate(i + 1, j)))  # Move Up
                     elif direction == Direction.HORIZONTAL and j < self.m - 1:
                         cars_to_move.append((car, Coordinate(i, j), Coordinate(i, j + 1)))  # Move Right
-
-        # Now move the cars
-        for car, old_coordinate, new_coordinate in cars_to_move:
-            self.junctions[old_coordinate.x][old_coordinate.y].remove_car(car)
-            self.junctions[new_coordinate.x][new_coordinate.y].add_car(car)
-            car.update_current_location()
+        return cars_to_move
 
     def get_all_junctions_wait_time(self) -> List[List[Dict[str, int]]]:
         return [[junction.get_cars_wait_time() for junction in junctions] for junctions in self.junctions]
