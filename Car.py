@@ -21,6 +21,20 @@ class Car:
         self._get_allowed_directions = allow_directions
         self._init_path()
 
+    @classmethod
+    def copy_constructor(cls, other_car: 'Car') -> 'Car':
+        new_car = cls(
+            car_id=other_car._id,
+            source=Coordinate(other_car._source.x, other_car._source.y),
+            destination=Coordinate(other_car._destination.x, other_car._destination.y),
+            start_time=other_car._start_time,
+            allow_directions=other_car._get_allowed_directions
+        )
+        new_car._path = list(other_car._path)
+        new_car._current_location_index = other_car._current_location_index
+        new_car._did_arrive = other_car._did_arrive
+        return new_car
+
     def current_direction(self) -> Direction:
         if self._current_location_index >= len(self._path) - 1:
             return Direction.HORIZONTAL  # Default direction if path is complete

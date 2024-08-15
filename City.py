@@ -17,16 +17,51 @@ MIN_TIME_TO_START = 0
 INF_INT = 10000
 
 class Neighborhood:
-    def __init__(self, junctions: ndarray, cars: List[Car]):
-        self.junctions = junctions
-#        self.traffic_system = TrafficSystem(traffic lights from the junction in the constructor)
+    def __init__(self, cars: List[Car], traffic_lights: List[List[TrafficLight]],
+                 grid: Grid, traffic_system: TrafficSystem):
+        self.cars: List[Car] = cars
+        self.traffic_lights = traffic_lights
+        self.traffic_system = traffic_system
+        self.grid = grid
         self.cars = cars
+        self.num_of_active_cars = len(self.cars)
 
     def get_state(self) -> ndarray:
-        pass
+        rows = len(self.grid.junctions)
+        cols = len(self.grid.junctions[0])
 
-    def update_neighborhood(self) -> None:
-        pass
+        # The array will have 4 channels: [#V, #H, isV, isH]
+        state = np.zeros((rows, cols, 4), dtype=int)
+        for i, junctions in enumerate(self.grid.junctions):
+            for j, junction in enumerate(junctions):
+                is_vertical = 0
+                is_horizontal = 0
+                if junction.get_is_vertical_highway():
+                    is_vertical = 1
+                if junction.get_is_horizontal_highway():
+                    is_horizontal = 1
+                vertical_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
+                horizontal_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+
+                state[i, j] = [vertical_cars, horizontal_cars, is_vertical, is_horizontal]
+        return state
+
+    def update_neighborhood(self, assignment: np.ndarray) -> None:
+        self.traffic_system.update_traffic_lights(assignment)
+        self.remove_cars_from_grid()
+        self.grid.update_sub_grid()
+
+    def remove_cars_from_grid(self):
+        for car in self.cars:
+            if self.grid.out_of_grid(car.current_location) and not car.get_did_arrive():
+                car.set_did_arrive(True)
+                self.num_of_active_cars -= 1
+            elif car.current_location == car.destination and not car.get_did_arrive():
+                self.grid.junctions[car.destination.x][car.destination.y].remove_car(car)
+                self.num_of_active_cars -= 1
+
+    def active_cars_amount(self) -> int:
+        return self.num_of_active_cars
 
 
 class City:
@@ -223,26 +258,19 @@ class City:
         return self.grid.get_all_junctions_wait_time()
 
     def get_neighborhood(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> Neighborhood:
-        pass
-
-    def generate_state(self, top_left: Coordinate, top_right: Coordinate, bottom_left: Coordinate) -> np.ndarray:
         rows = bottom_left.x - top_left.x + 1
         cols = top_right.y - top_left.y + 1
-
-        # The array will have 4 channels: [#V, #H, isV, isH]
-        state = np.zeros((rows, cols, 4), dtype=int)
+        copy_cars = []
+        copy_traffic_lights = [[TrafficLight() for _ in range(cols)] for _ in range(rows)]
+        copy_grid = Grid(copy_traffic_lights)
         for i in range(top_left.x, bottom_left.x + 1):
             for j in range(top_left.y, top_right.y + 1):
-                is_vertical = 0
-                is_horizontal = 0
-                if Coordinate(i, j) in self.grid.vertical_highway_junctions:
-                    is_vertical = 1
-                if Coordinate(i, j) in self.grid.horizontal_highway_junctions:
-                    is_horizontal = 1
-                junction = self.grid.junctions[i][j]
-                vertical_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
-                horizontal_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+                copy_traffic_lights[i][j].set_direction(self.traffic_lights[i][j].get_current_direction())
+                for real_car in self.grid.junctions[i][j].cars.values():
+                    copy_car = Car.copy_constructor(real_car)
+                    copy_grid.add_car_to_junction(copy_car, copy_car.current_location)
+                    copy_cars.append(copy_car)
 
-                state[i - top_left.x, j - top_left.y] = [vertical_cars, horizontal_cars, is_vertical, is_horizontal]
+        copy_traffic_system = TrafficSystem(copy_traffic_lights)
+        return Neighborhood(copy_cars, copy_traffic_lights, copy_grid, copy_traffic_system)
 
-        return state
