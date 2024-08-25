@@ -1,6 +1,7 @@
-from Solvers.BaseLineSolver import BaseLineSolver
-from Model.City import City
-from Model.Reporter import Reporter
+from matplotlib import pyplot as plt
+from BaseLineSolver import BaseLineSolver
+from City import City
+from Reporter import Reporter
 
 n = 8
 m = 8

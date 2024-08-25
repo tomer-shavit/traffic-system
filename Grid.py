@@ -1,9 +1,9 @@
 from typing import List, Dict
 
-from Model.Coordinate import Coordinate
-from Model.Junction import Junction
-from Model.TrafficLight import TrafficLight, Direction
-from Model.Car import Car
+from Coordinate import Coordinate
+from Junction import Junction
+from TrafficLight import TrafficLight, Direction
+from Car import Car
 
 START_HIGH_WAY = 2
 END_REFERENCE_HIGHWAY = 3

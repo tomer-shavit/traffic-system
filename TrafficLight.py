@@ -1,4 +1,4 @@
-from Model.Direction import Direction
+from Direction import Direction
 
 
 class TrafficLight:

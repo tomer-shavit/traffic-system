@@ -1,6 +1,6 @@
 from typing import List
-from Model.TrafficLight import TrafficLight
-from Model.Direction import Direction
+from TrafficLight import TrafficLight
+from Direction import Direction
 import numpy as np
 
 class TrafficSystem:

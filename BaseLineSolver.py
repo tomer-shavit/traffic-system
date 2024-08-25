@@ -1,8 +1,9 @@
 import numpy as np
 
-from Model.Direction import Direction
-from Model.Reporter import Reporter
-from Solvers.Solver import Solver
+from City import City
+from Direction import Direction
+from Reporter import Reporter
+from Solver import Solver
 
 
 class BaseLineSolver(Solver):
