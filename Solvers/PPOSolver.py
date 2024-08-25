@@ -7,7 +7,7 @@ from Model.Coordinate import Coordinate
 from Model.Direction import Direction
 from PPO.Agent import Agent
 from Model.Reporter import Reporter
-from Solver import Solver
+from Solvers.Solver import Solver
 
 NEIGHBORHOOD_N = 3
 NEIGHBORHOOD_M = 3
