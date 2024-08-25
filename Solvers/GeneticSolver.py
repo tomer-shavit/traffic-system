@@ -1,10 +1,10 @@
 import numpy as np
 from typing import List
 import matplotlib.pyplot as plt
-from City import City
-from Direction import Direction
-from Reporter import Reporter
-from Solver import Solver
+from Model.City import City
+from Model.Direction import Direction
+from Model.Reporter import Reporter
+from Solvers.Solver import Solver
 
 
 class GeneticSolver(Solver):

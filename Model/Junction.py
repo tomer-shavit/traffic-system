@@ -1,7 +1,6 @@
-from dataclasses import field
 from typing import Dict, List, Tuple
-from TrafficLight import TrafficLight, Direction
-from Car import Car
+from Model.TrafficLight import TrafficLight, Direction
+from Model.Car import Car
 
 REGULAR_JUNCTION_LIMIT = 10
 HIGHWAY_JUNCTION_LIMIT = 20

@@ -2,12 +2,12 @@ from typing import List, Dict
 
 import numpy as np
 from numpy import ndarray
-from Car import Car
-from TrafficLight import TrafficLight
-from Grid import Grid
-from TrafficSystem import TrafficSystem, Direction
+from Model.Car import Car
+from Model.TrafficLight import TrafficLight
+from Model.Grid import Grid
+from Model.TrafficSystem import TrafficSystem, Direction
 import random
-from Coordinate import Coordinate
+from Model.Coordinate import Coordinate
 
 INDUSTRIAL_SIZE = 2
 RESIDENTIAL_SIZE = 2

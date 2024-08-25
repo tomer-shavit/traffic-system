@@ -1,8 +1,6 @@
-from matplotlib import pyplot as plt
-
-from City import City
-from GeneticSolver import GeneticSolver
-from Reporter import Reporter
+from Model.City import City
+from Solvers.GeneticSolver import GeneticSolver
+from Model.Reporter import Reporter
 
 n = 8
 m = 8

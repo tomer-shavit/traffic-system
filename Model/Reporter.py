@@ -1,6 +1,6 @@
 import random
 
-import Coordinate
+from Model import Coordinate
 import numpy as np
 
 
