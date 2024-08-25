@@ -24,6 +24,13 @@ plt.figure(figsize=(12, 8))
 # Plot for moving cars amount
 plt.subplot(2, 2, 1)
 plt.plot(x_values, data_moving, label='Moving Cars Amount', color='blue')
+
+baseline_value = 3718
+plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+
+
+# Optional: Add a legend to explain the red line
+plt.legend()
 plt.xlabel('Generation')
 plt.ylabel('Value')
 plt.title('Moving Cars Amount')
@@ -32,6 +39,9 @@ plt.grid(True)
 # Plot for not reaching cars
 plt.subplot(2, 2, 2)
 plt.plot(x_values, data_not_reaching, label='Not Reaching Cars', color='red')
+baseline_value = 128
+plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+plt.legend()
 plt.xlabel('Generation')
 plt.ylabel('Value')
 plt.title('Not Reaching Cars')
@@ -40,6 +50,9 @@ plt.grid(True)
 # Plot for wait time punishment
 plt.subplot(2, 2, 3)
 plt.plot(x_values, data_wait_punishment, label='Wait Time Punishment', color='green')
+baseline_value = 99088
+plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+plt.legend()
 plt.xlabel('Generation')
 plt.ylabel('Value')
 plt.title('Wait Time Punishment')
@@ -48,6 +61,9 @@ plt.grid(True)
 # Plot for wait times check
 plt.subplot(2, 2, 4)
 plt.plot(x_values, data_wait_check, label='Wait Times Check', color='orange')
+baseline_value = 162
+plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+plt.legend()
 plt.xlabel('Generation')
 plt.ylabel('Value')
 plt.title('Wait Times Check')
