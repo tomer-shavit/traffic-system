@@ -1,13 +1,13 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from Model.Direction import Direction
+from Direction import Direction
 
 # Load the .npy file
 data_moving = np.load('moving_cars_amount494.npy')
 data_not_reaching = np.load('not_reaching_cars494.npy')
 data_wait_punishment = np.load('wait_time_punishment494.npy')
 data_wait_check = np.load('wait_times_check494.npy')
-# data_best = np.load('best_solutions494.npy', allow_pickle=True)
+data_best = np.load('best_solutions494.npy', allow_pickle=True)
 
 # Generate x values corresponding to the number of generations (1 to 150)
 x_values = range(1, 151)
