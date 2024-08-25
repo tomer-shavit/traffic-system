@@ -8,11 +8,11 @@ n = 8
 m = 8
 t = 40
 num_cities = 10
-num_cars = 300
+num_cars = 350
 
 population_size = 600
-mutation_rate = 0.015
-generations = 150
+mutation_rate = 0.025
+generations = 200
 temperature = 0.001
 
 reporter = Reporter()

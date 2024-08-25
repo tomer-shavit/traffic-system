@@ -7,7 +7,7 @@ n = 8
 m = 8
 t = 40
 num_cities = 10
-num_cars = 300
+num_cars = 350
 
 reporter = Reporter()
 solver = BaseLineSolver(n, m, t, reporter)
