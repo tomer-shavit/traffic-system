@@ -52,7 +52,6 @@ class GeneticSolver(Solver):
         child = np.concatenate((parent1[:crossover_point], parent2[crossover_point:]))
         return child
 
-
     def uniform_crossover(self, parent1: np.ndarray, parent2: np.ndarray) -> np.ndarray:
         """
         Performs uniform crossover between two parent solutions to produce a child solution.
@@ -120,20 +119,6 @@ class GeneticSolver(Solver):
         scaled_fitness = np.exp(shifted_fitness / self.temperature)
         return scaled_fitness / sum(scaled_fitness)
 
-    def select_parents(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
-        """
-        Selects parent solutions for the next generation using a fitness-proportionate selection method.
-
-        Parameters:
-        - population (np.ndarray): The current population of solutions.
-        - fitness_scores (np.ndarray): The fitness scores of the current population.
-
-        Returns:
-        - np.ndarray: The selected parent solutions.
-        """
-        probabilities = self.scale_fitness(fitness_scores)
-        parent_indices = np.random.choice(len(population), size=self.population_size, p=probabilities)
-        return population[parent_indices]
 
     def tournament_selection(self, population: np.ndarray, fitness_scores: np.ndarray,
                              tournament_size: int = 50) -> np.ndarray:
@@ -156,38 +141,6 @@ class GeneticSolver(Solver):
             selected_parents.append(population[best_index])
 
         return np.array(selected_parents)
-
-    import numpy as np
-
-    def rank_based_selection(self, population: np.ndarray, fitness_scores: np.ndarray) -> np.ndarray:
-        """
-        Selects parents using rank-based selection, prioritizing higher fitness scores.
-
-        Parameters:
-        - population (np.ndarray): The current population of solutions.
-        - fitness_scores (np.ndarray): The fitness scores of the current population (higher is better).
-
-        Returns:
-        - np.ndarray: The selected parent solutions.
-        """
-        # Rank the population by fitness, with higher fitness scores getting higher priority
-        ranked_indices = np.argsort(fitness_scores)[::-1]  # Descending order
-        ranked_population = population[ranked_indices]
-
-        # Generate ranks, with higher ranks for better fitness
-        num_individuals = len(fitness_scores)
-        rank = np.arange(1, num_individuals + 1)
-
-        # Calculate selection probabilities (higher ranks = higher probabilities)
-        selection_probabilities = rank / np.sum(rank)
-
-        # Select parents based on rank probabilities
-        selected_indices = np.random.choice(num_individuals, size=self.population_size, p=selection_probabilities)
-
-        # Retrieve the selected parent solutions
-        selected_parents = ranked_population[selected_indices]
-
-        return selected_parents
 
     def solve(self, num_cities: int, num_cars: int) -> np.ndarray:
         """
@@ -212,7 +165,7 @@ class GeneticSolver(Solver):
             parents = self.tournament_selection(population, fitness_scores)
             children = self.create_children(parents)
             population = self.add_best_to_children(children, best_solution)
-            self.report_best_solution(best_solution,cities)
+            self.report_best_solution(best_solution, cities)
             self.reporter.record_generations_best_solutions(best_fitness, best_solution)
 
         best_final_solution, best_final_fitness = self.find_best_solution(population, fitness_scores)
