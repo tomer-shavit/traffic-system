@@ -5,7 +5,6 @@ from City import City
 from Reporter import Reporter
 
 NOT_REACHING = 1
-ALL_CARS_ARRIVE_TIME = 1
 AVG_WAIT_TIME = 1
 MOVING_CARS_AMOUNT = 1
 WAIT_TIME = 1
@@ -41,6 +40,7 @@ class Solver(ABC):
         Parameters:
         - solution (np.ndarray): The solution to be evaluated.
         - cities (List[City]): A list of City objects representing different traffic scenarios.
+        - report (bool): Whether to record evaluation metrics in the Reporter.
 
         Returns:
         - float: The average waiting time for cars, or infinity if not all cars reach their destinations.
@@ -76,6 +76,21 @@ class Solver(ABC):
                  moving_cars_amount,
                  total_wait_time_punishment,
                  report):
+        """
+        Normalizes and combines the evaluation metrics into a single score.
+
+        Parameters:
+        - cities_amount (int): The number of cities evaluated.
+        - cars_amount (int): The number of cars per city.
+        - not_reaching_cars (int): The total number of cars that did not reach their destination.
+        - total_avg_wait_time (float): The total average wait time across all cities.
+        - moving_cars_amount (int): The total number of car movements across all cities.
+        - total_wait_time_punishment (float): The total punishment score for excessive wait times across all cities.
+        - report (bool): Whether to record evaluation metrics in the Reporter.
+
+        Returns:
+        - float: The combined evaluation score.
+        """
         score_not_reaching = self.normalize_not_reaching_cars(not_reaching_cars,
                                                               cities_amount, cars_amount, report)
         score_avg_wait_time = self.normalize_avg_wait_time(total_avg_wait_time,
@@ -91,6 +106,15 @@ class Solver(ABC):
                 score_wait_time_punishment * WAIT_TIME)
 
     def get_wait_time_punishment(self, city: City) -> float:
+        """
+        Calculates the total punishment for excessive wait times across all junctions in a city.
+
+        Parameters:
+        - city (City): The city object containing junctions with wait times.
+
+        Returns:
+        - float: The total punishment score for the city.
+        """
         wait_times = city.get_all_junctions_wait_time()
         total_punishment = 0
         for row_wait_times in wait_times:
@@ -99,6 +123,15 @@ class Solver(ABC):
         return total_punishment
 
     def get_junction_wait_time_punishment(self, wait_time: Dict[str, int]) -> float:
+        """
+        Calculates the punishment for wait times at a single junction.
+
+        Parameters:
+        - wait_time (Dict[str, int]): A dictionary of wait times for each car at the junction.
+
+        Returns:
+        - float: The punishment score for the junction.
+        """
         total = 0
         for time in wait_time.values():
             total += time ** 2
