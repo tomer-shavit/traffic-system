@@ -1,8 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from City import City
-from Direction import Direction
+from Model.City import City
+from Model.Direction import Direction
 
 m = 8
 n = 8
@@ -123,7 +123,7 @@ def plot_fitness(data_best):
 
 def main():
     """Main function to load data and generate plots."""
-    number = 494
+    number = 90
     data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, data_best = load_data(number)
 
     plot_data(data_moving, 'blue', 92.95, 'General Traffic Flow', 'Number Of Cars That Moved')

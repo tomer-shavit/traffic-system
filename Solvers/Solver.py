@@ -1,8 +1,8 @@
 from abc import abstractmethod, ABC
 import numpy as np
 from typing import List, Dict
-from City import City
-from Reporter import Reporter
+from Model.City import City
+from Model.Reporter import Reporter
 
 NOT_REACHING = 1
 AVG_WAIT_TIME = 1

@@ -2,11 +2,11 @@ from itertools import product
 from typing import List, Tuple
 import numpy as np
 
-from City import City, Neighborhood
-from Coordinate import Coordinate
-from Direction import Direction
+from Model.City import City, Neighborhood
+from Model.Coordinate import Coordinate
+from Model.Direction import Direction
 from PPO.Agent import Agent
-from Reporter import Reporter
+from Model.Reporter import Reporter
 from Solver import Solver
 
 NEIGHBORHOOD_N = 3

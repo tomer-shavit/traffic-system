@@ -1,8 +1,6 @@
-from matplotlib import pyplot as plt
-
-from City import City
-from GeneticSolver import GeneticSolver
-from Reporter import Reporter
+from Model.City import City
+from Solvers.GeneticSolver import GeneticSolver
+from Model.Reporter import Reporter
 
 n = 8
 m = 8
@@ -20,7 +18,7 @@ reporter = Reporter()
 solver = GeneticSolver(population_size, mutation_rate, generations, n, m, t, reporter, temperature)
 best_solution = solver.solve(num_cities, num_cars)
 solver.plot_best_fitness(reporter.best_solutions['fitness'])
-reporter.save_all_data('./ReporterData')
+reporter.save_all_data('../ReporterData')
 
 # print the best solution:
 city = City.generate_city(n, m, num_cars)

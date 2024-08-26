@@ -1,6 +1,5 @@
 import random
 
-import Coordinate
 import numpy as np
 
 

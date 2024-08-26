@@ -1,7 +1,8 @@
 from typing import List
-from TrafficLight import TrafficLight
-from Direction import Direction
+from Model.TrafficLight import TrafficLight
+from Model.Direction import Direction
 import numpy as np
+
 
 class TrafficSystem:
     def __init__(self, traffic_lights: List[List[TrafficLight]]):
