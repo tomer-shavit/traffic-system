@@ -1,12 +1,10 @@
-from BaseLineSolver import BaseLineSolver
-from City import City
-from Coordinate import Coordinate
-import numpy as np
-from Direction import Direction
+from Solvers.BaseLineSolver import BaseLineSolver
+from Model.City import City
+from Model.Coordinate import Coordinate
 import matplotlib.pyplot as plt
 import numpy as np
 
-from Reporter import Reporter
+from Model.Reporter import Reporter
 
 
 def print_path(city: City):
@@ -76,12 +74,12 @@ def plot_result():
 
 def load_data():
     # Load the data from the .npy files
-    wait_times = np.load('./ReporterData/wait_times.npy')
-    all_cars_arrive_time = np.load('./ReporterData/all_cars_arrive_time.npy')
-    not_reaching_cars = np.load('./ReporterData/not_reaching_cars.npy')
-    moving_cars_amount = np.load('./ReporterData/moving_cars_amount.npy')
-    wait_time_punishment = np.load('./ReporterData/wait_time_punishment.npy')
-    best_solutions = np.load('./ReporterData/best_solutions.npy', allow_pickle=True)
+    wait_times = np.load('../ReporterData/wait_times.npy')
+    all_cars_arrive_time = np.load('../ReporterData/all_cars_arrive_time.npy')
+    not_reaching_cars = np.load('../ReporterData/not_reaching_cars.npy')
+    moving_cars_amount = np.load('../ReporterData/moving_cars_amount.npy')
+    wait_time_punishment = np.load('../ReporterData/wait_time_punishment.npy')
+    best_solutions = np.load('../ReporterData/best_solutions.npy', allow_pickle=True)
 
     # Example: Accessing and printing the data
     print(wait_times)

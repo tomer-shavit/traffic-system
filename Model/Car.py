@@ -2,8 +2,8 @@ from typing import List, Callable
 
 import numpy as np
 
-from Coordinate import Coordinate
-from Direction import Direction
+from Model.Coordinate import Coordinate
+from Model.Direction import Direction
 import random
 
 NOISE_CAR_PATH = 0.03

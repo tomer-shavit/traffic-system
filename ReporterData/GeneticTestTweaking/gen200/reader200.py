@@ -1,6 +1,5 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from Direction import Direction
 
 # Load the .npy file
 number = 669
