@@ -1,97 +1,141 @@
 import numpy as np
 from matplotlib import pyplot as plt
+
+from City import City
 from Direction import Direction
 
-# Load the .npy file
-data_moving = np.load('moving_cars_amount494.npy')
-data_not_reaching = np.load('not_reaching_cars494.npy')
-data_wait_punishment = np.load('wait_time_punishment494.npy')
-data_wait_check = np.load('wait_times_check494.npy')
-data_best = np.load('best_solutions494.npy', allow_pickle=True)
+m = 8
+n = 8
+t = 40
+num_cars = 350
 
-# # Generate x values corresponding to the number of generations (1 to 150)
-x_values = range(1, 151)
-#
-# Flatten the data arrays, as they contain tuples with one element
-data_moving = data_moving.flatten()
-data_not_reaching = data_not_reaching.flatten()
-data_wait_punishment = data_wait_punishment.flatten()
-data_wait_check = data_wait_check.flatten()
+def plot_direction_counts(junction_data):
+    """
+    Plots a bar chart showing the counts of horizontal and vertical directions
+    at each junction.
 
-# Plot each dataset
-plt.figure(figsize=(12, 8))
+    :param junction_data: List of tuples containing junction coordinates and their direction counts.
+                          Example: [((i, j), horizontal_count, vertical_count), ...]
+    """
+    junctions = [f"({i},{j})" for (i, j), _, _ in junction_data]
+    horizontal_counts = [horizontal for _, horizontal, _ in junction_data]
+    vertical_counts = [vertical for _, _, vertical in junction_data]
 
-# Plot for moving cars amount
-plt.subplot(2, 2, 1)
-plt.plot(x_values, data_moving, label='Moving Cars Amount', color='blue')
+    x = np.arange(len(junctions))  # Label locations
+    width = 0.35  # Bar width
 
-baseline_value = 3718
-plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bars1 = ax.bar(x - width/2, horizontal_counts, width, label='Horizontal')
+    bars2 = ax.bar(x + width/2, vertical_counts, width, label='Vertical')
 
+    ax.set_xlabel('Junction (i,j)')
+    ax.set_ylabel('Count')
+    ax.set_title('Traffic Direction Counts at Highway Junctions')
+    ax.set_xticks(x)
+    ax.set_xticklabels(junctions)
+    ax.legend()
 
-# Optional: Add a legend to explain the red line
-plt.legend()
-plt.xlabel('Generation')
-plt.ylabel('Value')
-plt.title('Moving Cars Amount')
-plt.grid(True)
+    # Add counts on top of bars
+    ax.bar_label(bars1, padding=3)
+    ax.bar_label(bars2, padding=3)
 
-# Plot for not reaching cars
-plt.subplot(2, 2, 2)
-plt.plot(x_values, data_not_reaching, label='Not Reaching Cars', color='red')
-baseline_value = 128
-plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
-plt.legend()
-plt.xlabel('Generation')
-plt.ylabel('Value')
-plt.title('Not Reaching Cars')
-plt.grid(True)
-
-# Plot for wait time punishment
-plt.subplot(2, 2, 3)
-plt.plot(x_values, data_wait_punishment, label='Wait Time Punishment', color='green')
-baseline_value = 99088
-plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
-plt.legend()
-plt.xlabel('Generation')
-plt.ylabel('Value')
-plt.title('Wait Time Punishment')
-plt.grid(True)
-
-# Plot for wait times check
-plt.subplot(2, 2, 4)
-plt.plot(x_values, data_wait_check, label='Wait Times Check', color='orange')
-baseline_value = 162
-plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
-plt.legend()
-plt.xlabel('Generation')
-plt.ylabel('Value')
-plt.title('Wait Times Check')
-plt.grid(True)
-
-# Adjust layout and show the plot
-plt.tight_layout()
-plt.show()
-
-x_values = range(1, 152)
-
-fitness_values = data_best['fitness'].flatten()
-plt.plot(x_values, fitness_values, marker='o', markersize=2, label='Genetic Algorithm')
-
-# Step 3: Draw a red horizontal line at y = 2.6062604
-baseline_value = 2.6062604
-plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+    fig.tight_layout()
+    plt.show()
 
 
-# Optional: Add a legend to explain the red line
-plt.legend()
+def highway_analyzing(data_best):
+    for a in range(3):
+        print(f'\na = {a}:')
+        last_solution = data_best['solution'][-a]
+        city = City.generate_city(n, m, num_cars)
+        for i, junctions in enumerate(city.grid.junctions):
+            for j, junction in enumerate(junctions):
+                if junction.get_is_vertical_highway():
+                    seperation(i, j, last_solution, 'vertical')
+                if junction.get_is_horizontal_highway():
+                    seperation(i, j, last_solution, 'horizontal')
 
-# Step 4: Add titles and labels
-plt.title('Best Fitness Over Generations - High Mutation Rate')
-plt.xlabel('Generation')
-plt.ylabel('Best Fitness Score')
-plt.grid(True)
 
-# Show the plot
-plt.show()
+def seperation(i, j, last_solution, direction):
+    print(f"junction ({i},{j}) {direction}")
+    junction_over_time = last_solution[:, i, j]
+    horizontal_count = np.sum(junction_over_time == Direction.HORIZONTAL)
+    vertical_count = np.sum(junction_over_time == Direction.VERTICAL)
+    print(f'horizontal_count = {horizontal_count}')
+    print(f'vertical_count = {vertical_count}')
 
+
+def process_avg_wait_time(data_avg_wait_time):
+    data_avg_wait_time = data_avg_wait_time['avg_wait_time'].flatten()
+    return data_avg_wait_time * ((m * n) / num_cars)
+
+
+def process_moving(data_moving):
+    data_moving = data_moving['active_car'].flatten()
+    return data_moving / t
+
+
+def process_punishment(data_wait_punishment):
+    data_wait_punishment = data_wait_punishment['wait_punishment'].flatten()
+    return data_wait_punishment / (m * n)
+
+
+def load_data(number):
+    """Load the necessary data from .npy files."""
+    data_moving = np.load(f'moving_cars_amount{number}.npy').flatten()
+    data_not_reaching = np.load(f'not_reaching_cars{number}.npy').flatten()
+    data_wait_punishment = np.load(f'wait_time_punishment{number}.npy').flatten()
+    data_avg_wait_time = np.load(f'wait_times_check{number}.npy').flatten()
+    data_best = np.load(f'best_solutions{number}.npy', allow_pickle=True)
+
+    data_moving = process_moving(data_moving)
+    data_avg_wait_time = process_avg_wait_time(data_avg_wait_time)
+    data_wait_punishment = process_punishment(data_wait_punishment)
+
+    return data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, data_best
+
+def plot_data(y_values, color, baseline_value, title, ylabel):
+    """Plot a single dataset with baseline value."""
+    x_values = range(len(y_values))
+    plt.figure()
+    plt.plot(x_values, y_values, label='Genetic Algorithm', color=color)
+    plt.axhline(y=baseline_value, color='red', linestyle='--', label='Baseline Solution')
+    plt.legend()
+    plt.xlabel('Generation')
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+def plot_fitness(data_best):
+    """Plot the best fitness values over generations."""
+    x_values = range(len(data_best))
+    fitness_values = data_best['fitness'].flatten()
+    plt.figure()
+    plt.plot(x_values, fitness_values, label='Genetic Algorithm')
+    plt.axhline(y=2.6062604, color='red', linestyle='--', label='Baseline Solution')
+    plt.legend()
+    plt.title('Best Fitness Over Generations')
+    plt.xlabel('Generation')
+    plt.ylabel('Best Fitness Score')
+    plt.grid(True)
+    plt.show()
+
+def main():
+    """Main function to load data and generate plots."""
+    number = 494
+    data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, data_best = load_data(number)
+
+    plot_data(data_moving, 'blue', 92.95, 'General Traffic Flow', 'Number Of Cars That Moved')
+    plot_data(data_not_reaching, 'purple', 128, 'How Many Cars Were Late', 'Number Of Cars')
+    plot_data(data_wait_punishment, 'green', 1548.25, 'Car Starvation Punishment', 'Average Car Starvation Punishment')
+    plot_data(data_avg_wait_time, 'orange', 29.622, 'Average Car Wait Time', 'Average Time')
+
+    # plot_fitness(data_best)
+    highway_analyzing(data_best)
+    # 3 random highway
+    junction_data = [((2, 3), 32, 8), ((2, 4), 31, 9), ((3, 5), 18, 22)]
+    plot_direction_counts(junction_data)
+
+if __name__ == "__main__":
+    main()

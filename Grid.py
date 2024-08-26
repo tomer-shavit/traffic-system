@@ -93,8 +93,9 @@ class Grid:
 
     def get_total_avg_wait_time(self) -> float:
         """Calculate the average wait time across all unique cars in all junctions."""
-        return sum([sum([junction.get_avg_wait_time() for junction in junctions]) for junctions in
-                    self.junctions]) / (self.m * self.n)
+        all_junctions_avg_wait_time = sum([sum([junction.get_avg_wait_time() for junction in junctions]) for junctions in
+                                           self.junctions])
+        return all_junctions_avg_wait_time / (self.m * self.n)
 
     def add_car_to_junction(self, car: Car, coordinate: Coordinate) -> None:
         """Add a car to a specific junction."""
