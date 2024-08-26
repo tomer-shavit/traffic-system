@@ -9,6 +9,8 @@ from PPO.Agent import Agent
 from Model.Reporter import Reporter
 from Solver import Solver
 
+NUM_OF_REPRESENTATIONS = 4
+
 NEIGHBORHOOD_N = 3
 NEIGHBORHOOD_M = 3
 # If learning is too slow: Try increasing the batch size or the number of epochs.
@@ -30,15 +32,15 @@ class PPOSolver(Solver):
         return Agent(n_actions=len(self.all_actions),
                      batch_size=BATCH_SIZE,
                      n_epoch=NUM_OF_EPOCHS,
-                     input_dims=self.get_input_dims())
+                     input_dims=self.get_state_dims())
 
-    def get_input_dims(self) -> Tuple[int]:
-        return NEIGHBORHOOD_M * NEIGHBORHOOD_M,
+    def get_state_dims(self) -> Tuple[int]:
+        return NEIGHBORHOOD_M * NEIGHBORHOOD_M * NUM_OF_REPRESENTATIONS,
 
     def init_all_actions(self) -> List[np.ndarray]:
         possible_combinations = list(product([Direction.HORIZONTAL, Direction.VERTICAL],
-                                             repeat=self.get_input_dims()[0]))
-        return [np.array(combination) for combination in possible_combinations]
+                                             repeat=NEIGHBORHOOD_M * NEIGHBORHOOD_M))
+        return [np.array(combination).reshape(NEIGHBORHOOD_M, NEIGHBORHOOD_M) for combination in possible_combinations]
 
     def solve(self, city: City) -> np.ndarray:
         counter = 0
@@ -69,14 +71,15 @@ class PPOSolver(Solver):
         score_history = []
         best_score = float('-inf')
 
-        for city in cities:
+        for index, city in enumerate(cities):
+            print(f"starting to going over city number {index + 1} out of {len(cities)}")
             score = 0
             counter = 0
             while city.active_cars_amount() != 0 and counter <= MAX_ITERATIONS:
                 actions_for_current_tick = []
                 for i in range(self.n - NEIGHBORHOOD_N + 1):
                     for j in range(self.m - NEIGHBORHOOD_M + 1):
-                        score = self.neighborhood_iteration(actions_for_current_tick, city, i, j, score)
+                        score += self.neighborhood_iteration(actions_for_current_tick, city, i, j)
 
                 assignment = self.vote_on_assignment(actions_for_current_tick)
                 self.agent.learn()
@@ -86,28 +89,28 @@ class PPOSolver(Solver):
             score_history.append(score)
             avg_score = np.mean(score_history[-100:])
             if avg_score > best_score:
+                print(f"best score updated from: {best_score} to avg score: {avg_score}")
                 best_score = avg_score
                 self.agent.save_models()
 
         # need to consider what we want to report
         self.reporter.report_training_results(score_history, best_score)
 
-    def neighborhood_iteration(self, actions_for_current_tick, city, i, j, score):
+    def neighborhood_iteration(self, actions_for_current_tick, city, i, j) -> float:
         top_left, top_right, bottom_left = self.build_neighborhood_coords(i, j)
         neighborhood = city.get_neighborhood(top_left, top_right, bottom_left)
         action, prob, val = self.agent.choose_action(neighborhood.get_state())
         reward, done = self.evaluate_neighborhood(action, neighborhood)
-        score += reward
         actions_for_current_tick.append(action)
         self.agent.remember(neighborhood.get_state(), action, prob, val, reward, done)
 
-        return score
+        return reward
 
     def build_neighborhood_coords(self, i, j):
         top_left = Coordinate(i, j)
         top_right = Coordinate(i, j + NEIGHBORHOOD_M - 1)
         bottom_left = Coordinate(i + NEIGHBORHOOD_N - 1, j)
-        return bottom_left, top_left, top_right
+        return top_left, top_right, bottom_left
 
     def vote_on_assignment(self, actions: List[int]) -> np.ndarray:
         votes = np.zeros((self.n, self.m, 2), dtype=int)
@@ -117,12 +120,13 @@ class PPOSolver(Solver):
                 action_idx = actions.pop(0)
                 action = self.all_actions[action_idx]
 
+                # Ensure action is 2D and iterate over its elements directly
                 for ni in range(NEIGHBORHOOD_N):
                     for nj in range(NEIGHBORHOOD_M):
                         global_i = i + ni
                         global_j = j + nj
 
-                        if action[ni * NEIGHBORHOOD_M + nj] == Direction.HORIZONTAL:
+                        if action[ni, nj] == Direction.HORIZONTAL:
                             votes[global_i][global_j][0] += 1
                         else:
                             votes[global_i][global_j][1] += 1
@@ -162,4 +166,4 @@ class PPOSolver(Solver):
             for wait_time in row_wait_times:
                 total_punishment += self.get_junction_wait_time_punishment(wait_time)
 
-        return total_punishment\
+        return total_punishment

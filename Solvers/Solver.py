@@ -136,6 +136,9 @@ class Solver(ABC):
                                     cities_amount: int, cars_amount: int, report: bool) -> float:
         if report:
             self.reporter.record_not_reaching_cars(not_reaching_cars / cities_amount)
+        if cars_amount == 0:
+            return 0
+
         max_cars = cars_amount * cities_amount
         normalized_not_reaching_cars = not_reaching_cars / max_cars
         return 1 / (1 + normalized_not_reaching_cars)
@@ -144,6 +147,9 @@ class Solver(ABC):
                                 cities_amount: int, cars_amount: int, report: bool) -> float:
         if report:
             self.reporter.record_avg_wait_time(total_avg_wait_time / cities_amount)
+        if cars_amount == 0:
+            return 0
+
         max_waiting_cars = self.t * cars_amount * cities_amount / (self.m * self.n)
         normalized_total_avg_wait_time = total_avg_wait_time / max_waiting_cars
         return 1 / (1 + normalized_total_avg_wait_time)
@@ -152,6 +158,9 @@ class Solver(ABC):
                                      cities_amount: int, cars_amount: int, report: bool) -> float:
         if report:
             self.reporter.record_moving_cars(moving_cars_amount / cities_amount)
+        if cars_amount == 0:
+            return 0
+
         max_moving_cars = cities_amount * cars_amount * self.t
         return moving_cars_amount / max_moving_cars
 
@@ -159,6 +168,9 @@ class Solver(ABC):
                                        cities_amount: int, cars_amount: int, report: bool) -> float:
         if report:
             self.reporter.record_wait_punishment(wait_time_punishment / cities_amount)
+        if cars_amount == 0:
+            return 0
+
         max_punishment = (self.t * cars_amount * cities_amount) ** 2
         normalized_total_wait_time_punishment = wait_time_punishment / max_punishment
         return 1 / (1 + normalized_total_wait_time_punishment)
