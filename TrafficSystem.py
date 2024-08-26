@@ -3,6 +3,7 @@ from TrafficLight import TrafficLight
 from Direction import Direction
 import numpy as np
 
+
 class TrafficSystem:
     def __init__(self, traffic_lights: List[List[TrafficLight]]):
         self.traffic_lights = traffic_lights
