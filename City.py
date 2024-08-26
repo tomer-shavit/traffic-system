@@ -16,6 +16,7 @@ MIN_TIME_TO_START = 0
 
 INF_INT = 10000
 
+
 class Neighborhood:
     def __init__(self, cars: List[Car], traffic_lights: List[List[TrafficLight]],
                  grid: Grid, traffic_system: TrafficSystem, shift_x: int, shift_y: int):
@@ -32,7 +33,6 @@ class Neighborhood:
         self.n = len(self.grid.junctions)
         self.m = len(self.grid.junctions[0])
 
-
     def get_state(self) -> ndarray:
         rows = len(self.grid.junctions)
         cols = len(self.grid.junctions[0])
@@ -47,8 +47,10 @@ class Neighborhood:
                     is_vertical = 1
                 if junction.get_is_horizontal_highway():
                     is_horizontal = 1
-                vertical_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
-                horizontal_cars = sum(1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
+                vertical_cars = sum(
+                    1 for car in junction.cars.values() if car.current_direction() == Direction.VERTICAL)
+                horizontal_cars = sum(
+                    1 for car in junction.cars.values() if car.current_direction() == Direction.HORIZONTAL)
 
                 state[i, j] = [vertical_cars, horizontal_cars, is_vertical, is_horizontal]
         return state.flatten()
@@ -145,10 +147,10 @@ class City:
         source = self.get_random_location(self.residential_coords)
         dest = self.get_random_location(self.industrial_coords)
         departure_time = self.get_normal_departure_time(MAX_TIME_TO_START / 2, MAX_TIME_TO_START / 2)
-        return Car(f"Car_{car_num}", source, dest, departure_time, self.grid.allow_directions)
+        return Car(f"Car_{car_num}", source, dest, departure_time, self.grid.check_highway_direction)
 
     def get_normal_departure_time(self, mean: float, std_dev: float) -> int:
-        """Generate a normally distributed departure time within 0 to 10 and round to a whole number."""
+        """Generate a normally distributed departure time."""
         departure_time = round(random.normalvariate(mean, std_dev))
         return max(0, min(MAX_TIME_TO_START, departure_time))
 
@@ -175,6 +177,7 @@ class City:
         return self.grid.get_total_avg_wait_time()
 
     def update_city(self, assignment: ndarray, debug: bool = False):
+        """Forward the city state by one tick of time"""
         self.traffic_system.update_traffic_lights(assignment)
         if debug:
             self.print(assignment)
@@ -282,6 +285,7 @@ class City:
         return [City.generate_city(n, m, num_cars) for _ in range(num_cities)]
 
     def add_cars_to_grid_by_time(self):
+        """Add all cars that need to depart in the current time to the grid"""
         for car in self.cars:
             if car.start_time == self.time:
                 self.grid.add_car_to_junction(car, car.source)
@@ -294,6 +298,7 @@ class City:
         self.num_of_active_cars = len(self.cars)
 
     def remove_cars_from_grid(self):
+        """Remove all cars that arrived to their destination to the grid"""
         for car in self.cars:
             if car.current_location == car.destination and not car.get_did_arrive():
                 self.grid.junctions[car.destination.x][car.destination.y].remove_car(car)
@@ -347,10 +352,10 @@ class City:
         for i in range(top_left.x, bottom_left.x + 1):
             for j in range(top_left.y, top_right.y + 1):
                 junction = self.grid.junctions[i][j]
-                copy_traffic_lights[i-shift_x][j-shift_y].set_direction(self.traffic_lights[i][j].get_current_direction())
+                copy_traffic_lights[i - shift_x][j - shift_y].set_direction(
+                    self.traffic_lights[i][j].get_current_direction())
                 if junction.get_is_vertical_highway():
                     vertical_highway_junctions.append(Coordinate(i - shift_x, j - shift_y))
                 if junction.get_is_horizontal_highway():
                     horizontal_highway_junctions.append(Coordinate(i - shift_x, j - shift_y))
         return horizontal_highway_junctions, vertical_highway_junctions
-

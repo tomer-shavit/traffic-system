@@ -104,22 +104,6 @@ class GeneticSolver(Solver):
 
         return children
 
-    def scale_fitness(self, fitness_scores: np.ndarray) -> np.ndarray:
-        """
-        Applies exponential scaling to the fitness scores to amplify differences between them.
-
-        Parameters:
-        - fitness_scores (np.ndarray): The fitness scores of the population.
-
-        Returns:
-        - np.ndarray: Scaled fitness scores.
-        """
-        min_fitness = np.min(fitness_scores)
-        shifted_fitness = fitness_scores - min_fitness
-        scaled_fitness = np.exp(shifted_fitness / self.temperature)
-        return scaled_fitness / sum(scaled_fitness)
-
-
     def tournament_selection(self, population: np.ndarray, fitness_scores: np.ndarray,
                              tournament_size: int = 50) -> np.ndarray:
         """
@@ -200,16 +184,6 @@ class GeneticSolver(Solver):
         random_index = np.random.randint(0, len(children))
         return np.concatenate(
             (children[:random_index], children[random_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
-
-    def plot_fitness_history(self):
-        #TODO: ask Tomer what is self.fitness_history?
-        plt.figure(figsize=(10, 6))
-        plt.plot(range(1, len(self.fitness_history) + 1), self.fitness_history)
-        plt.title('Fitness over Generations')
-        plt.xlabel('Generation')
-        plt.ylabel('Fitness (lower is better)')
-        plt.grid(True)
-        plt.show()
 
     def plot_best_fitness(self, fitness_values):
         """

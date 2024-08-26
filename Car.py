@@ -8,9 +8,10 @@ import random
 
 NOISE_CAR_PATH = 0.03
 
+
 class Car:
     def __init__(self, car_id: str, source: Coordinate, destination: Coordinate, start_time: int,
-                 allow_directions: Callable[[Coordinate], List[Direction]]):
+                 get_highway_direction: Callable[[Coordinate], List[Direction]]):
         self._id: str = car_id
         self._source: Coordinate = source
         self._destination: Coordinate = destination
@@ -18,7 +19,7 @@ class Car:
         self._path: List[Coordinate] = []
         self._start_time: int = start_time
         self._did_arrive: bool = False
-        self._get_allowed_directions = allow_directions
+        self._get_highway_direction = get_highway_direction
         self._init_path()
 
     @classmethod
@@ -28,7 +29,7 @@ class Car:
             source=Coordinate(other_car._source.x, other_car._source.y),
             destination=Coordinate(other_car._destination.x, other_car._destination.y),
             start_time=other_car._start_time,
-            allow_directions=other_car._get_allowed_directions
+            get_highway_direction=other_car._get_highway_direction
         )
         new_car._path = list(other_car._path)
         new_car._current_location_index = other_car._current_location_index
@@ -36,6 +37,10 @@ class Car:
         return new_car
 
     def current_direction(self) -> Direction:
+        """
+        Returns the cars current direction
+        :return:
+        """
         if self._current_location_index >= len(self._path) - 1:
             return Direction.HORIZONTAL  # Default direction if path is complete
 
@@ -56,9 +61,6 @@ class Car:
     def _init_path(self) -> None:
         """
         Choose a path from the source coordinate to the destination coordinate.
-        To represent a realistic city, for each junction we define what direction in allows to move.
-        For example, if the set of junctions: {(x,y), (x,y+1), (x,y+2)} allows to drive vertical only,
-        it represents a highway.
         """
         self._path = [self._source]
         current = self._source
@@ -71,9 +73,14 @@ class Car:
             current = next_step
 
     def _choose_next_step(self, current: Coordinate) -> Coordinate:
-        highway_step = self.get_highway_step(current)
-        if self.valid_step(highway_step):
-            return highway_step
+        """
+        Choose the car next step on the path.
+        :param current: Current location.
+        :return: The next step.
+        """
+        highway_next_step = self.get_highway_next_step(current)
+        if self.valid_step(highway_next_step):
+            return highway_next_step
         return self.get_probabilistic_step(current)
 
     def update_current_location(self) -> None:
@@ -113,18 +120,19 @@ class Car:
         flip the next step. if the next step is horizontal, so move vertical instead, and vise versa.
         :param current: the current coordinate
         :param next_step: the next coordinate before flipping
-        :return: The next step cooredinate after flipping
+        :return: The next step coordinate after flipping
         """
         if abs(current.x - next_step.x) == 1:
             flipped_coordinate = Coordinate(current.x, current.y + 1)
         else:
             flipped_coordinate = Coordinate(current.x + 1, current.y)
-        if flipped_coordinate.x > self._destination.x or flipped_coordinate.y > self._destination.y :
+        if flipped_coordinate.x > self._destination.x or flipped_coordinate.y > self._destination.y:
             return next_step
         return flipped_coordinate
 
-    def get_highway_step(self, current: Coordinate) -> Coordinate:
-        allowed_directions = self._get_allowed_directions(current)
+    def get_highway_next_step(self, current: Coordinate) -> Coordinate:
+        """Return the direction flow of the highway, if current coordinate is on a highway"""
+        allowed_directions = self._get_highway_direction(current)
 
         if len(allowed_directions) == 1:
             direction = allowed_directions[0]
@@ -135,6 +143,7 @@ class Car:
         return Coordinate(-1, -1)
 
     def get_probabilistic_step(self, current):
+        """Uniformly choose the car next step to the destination"""
         steps_x = self._destination.x - current.x
         steps_y = self._destination.y - current.y
         total_steps = abs(steps_x) + abs(steps_y)
@@ -150,11 +159,12 @@ class Car:
             new_y = current.y + (1 if steps_y > 0 else -1)
             return Coordinate(current.x, new_y)
 
-    def valid_step(self, highway_step: Coordinate) -> bool:
-        if highway_step == Coordinate(-1, -1):
+    def valid_step(self, coordinate: Coordinate) -> bool:
+        """Check if the car current location is valid"""
+        if coordinate == Coordinate(-1, -1):
             return False
-        if highway_step.x > self._destination.x:
+        if coordinate.x > self._destination.x:
             return False
-        if highway_step.y > self._destination.y:
+        if coordinate.y > self._destination.y:
             return False
         return True
