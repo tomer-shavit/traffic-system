@@ -30,6 +30,11 @@ class Grid:
         self.total_car_movements = 0
 
     def init_junctions(self, traffic_lights) -> List[List[Junction]]:
+        """
+        Initialize a 2D array of Junctions by the given traffic light configuration.
+        :param traffic_lights: A 2D array of traffic lights configuration.
+        :return: A 2d array of Junctions.
+        """
         return [
             [
                 Junction(
@@ -68,11 +73,18 @@ class Grid:
             car.update_current_location()
 
     def out_of_grid(self, coordinate: Coordinate) -> bool:
+        """
+        Checks if a coordinate is out of the grid bounds.
+        :param coordinate: The coordinate to check.
+        :return: True if coordinate is out of bounds.
+        """
         if coordinate.x >= self.n or coordinate.y >= self.m:
             return True
         return False
 
-    def get_cars_to_move(self):
+    def get_cars_to_move(self) -> list[tuple[Car, Coordinate, Coordinate]]:
+        """Return a list of all the cars that will move in the next tick ot time and where they
+        will move"""
         cars_to_move = []
         # First, update all junctions and collect cars that need to be moved
         for i in range(self.n):
@@ -104,10 +116,6 @@ class Grid:
         else:
             print(f"Invalid junction coordinates: ({coordinate.x}, {coordinate.y})")
 
-    def get_grid_state(self) -> List[List[Dict]]:
-        """Get the current state of all junctions in the grid."""
-        pass  # TODO: fill this
-
     def init_vertical_highway_junctions(self, vertical_highways: List[int], width: int = 1) -> List[Coordinate]:
         """
         Initialize vertical highways by specifying which columns should have vertical highways.
@@ -136,7 +144,8 @@ class Grid:
                 horizontal_junctions.append(Coordinate(column, start_point + w))
         return horizontal_junctions
 
-    def allow_directions(self, coordinate: Coordinate) -> List[Direction]:
+    def check_highway_direction(self, coordinate: Coordinate) -> List[Direction]:
+        """If coordinate is on a highway, return the highway preferred direction"""
         if coordinate in self.vertical_highway_junctions:
             if coordinate in self.horizontal_highway_junctions:
                 return [Direction.VERTICAL, Direction.HORIZONTAL]
