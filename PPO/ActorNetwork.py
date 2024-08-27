@@ -5,7 +5,7 @@ import torch.optim as optim
 from torch.distributions.categorical import Categorical
 
 class ActorNetwork(nn.Module):
-    def __init__(self, n_actions, input_dims, alpha, fc1_dim=256, fc2_dim=256, chkpt_dir='tmp/ppo'):
+    def __init__(self, n_actions, input_dims, alpha, fc1_dim=256, fc2_dim=256, chkpt_dir='..\\tmp'):
         super(ActorNetwork, self).__init__()
 
         self.checkpoint_file = os.path.join(chkpt_dir, 'actor_torch_ppo')
