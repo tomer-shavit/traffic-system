@@ -1,5 +1,6 @@
-from PPOSolver import PPOSolver, City
-from Reporter import Reporter
+from Solvers.PPOSolver import PPOSolver
+from Model.Reporter import Reporter
+
 n = 10  # City width
 m = 10  # City height
 t = 100  # Max time steps

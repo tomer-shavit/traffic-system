@@ -7,7 +7,7 @@ from Model.Coordinate import Coordinate
 from Model.Direction import Direction
 from PPO.Agent import Agent
 from Model.Reporter import Reporter
-from Solver import Solver
+from Solvers.Solver import Solver
 
 NUM_OF_REPRESENTATIONS = 4
 
@@ -16,7 +16,7 @@ NEIGHBORHOOD_M = 3
 # If learning is too slow: Try increasing the batch size or the number of epochs.
 # If learning is unstable: Try decreasing the batch size or the number of epochs.
 # If you're facing memory constraints: Decrease the batch size.
-BATCH_SIZE = 128
+BATCH_SIZE = 20
 NUM_OF_EPOCHS = 5
 NUM_OF_SIMULATIONS = 6
 MAX_ITERATIONS = 100
@@ -40,7 +40,7 @@ class PPOSolver(Solver):
     def init_all_actions(self) -> List[np.ndarray]:
         possible_combinations = list(product([Direction.HORIZONTAL, Direction.VERTICAL],
                                              repeat=NEIGHBORHOOD_M * NEIGHBORHOOD_M))
-        return [np.array(combination).reshape(NEIGHBORHOOD_M, NEIGHBORHOOD_M) for combination in possible_combinations]
+        return [np.array(combination).reshape(NEIGHBORHOOD_N, NEIGHBORHOOD_M) for combination in possible_combinations]
 
     def solve(self, city: City) -> np.ndarray:
         counter = 0
@@ -65,6 +65,8 @@ class PPOSolver(Solver):
             raise RuntimeError(f"Max iteration reached and there are still: {city.active_cars_amount()} active cars.")
 
         return np.array(solution)
+    def neighborhood_count(self):
+        return (self.n - NEIGHBORHOOD_N + 1) * (self.m - NEIGHBORHOOD_M + 1)
 
     def train(self, num_cities: int, num_cars: int) -> None:
         cities = City.generate_cities(self.n, self.m, num_cars, num_cities)
@@ -73,21 +75,24 @@ class PPOSolver(Solver):
 
         for index, city in enumerate(cities):
             print(f"starting to going over city number {index + 1} out of {len(cities)}")
-            score = 0
-            counter = 0
-            while city.active_cars_amount() != 0 and counter <= MAX_ITERATIONS:
+            solution = np.empty((self.t, self.n, self.m), dtype=Direction)
+            for t in range(self.t):
                 actions_for_current_tick = []
                 for i in range(self.n - NEIGHBORHOOD_N + 1):
                     for j in range(self.m - NEIGHBORHOOD_M + 1):
-                        score += self.neighborhood_iteration(actions_for_current_tick, city, i, j)
+                        self.neighborhood_iteration(actions_for_current_tick, city, i, j) / self.neighborhood_count()
 
                 assignment = self.vote_on_assignment(actions_for_current_tick)
+                solution[t] = assignment
                 self.agent.learn()
                 city.update_city(assignment)
-                counter += 1
 
+            city.reset_city()
+            score = self.evaluate_solution(solution, [city])
+            print(f"Score for city {index+1} is: {score}")
             score_history.append(score)
             avg_score = np.mean(score_history[-100:])
+
             if avg_score > best_score:
                 print(f"best score updated from: {best_score} to avg score: {avg_score}")
                 best_score = avg_score
@@ -145,8 +150,10 @@ class PPOSolver(Solver):
 
     def evaluate_neighborhood(self, action: int, neighborhood: Neighborhood, report: bool = False) -> Tuple[int, bool]:
         # TODO: implement diminishing effect when calculating the reward
+        cur_action = action
         for _ in range(NUM_OF_SIMULATIONS):
-            neighborhood.update_neighborhood(self.all_actions[action])
+            neighborhood.update_neighborhood(self.all_actions[cur_action])
+            cur_action, _, _ = self.agent.choose_action(neighborhood.get_state())
 
         total_avg_wait_time = neighborhood.grid.get_total_avg_wait_time()
         not_reaching_cars = neighborhood.active_cars_amount()
