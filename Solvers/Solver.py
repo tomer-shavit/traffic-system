@@ -4,11 +4,6 @@ from typing import List, Dict
 from Model.City import City
 from Model.Reporter import Reporter
 
-NOT_REACHING = 1
-AVG_WAIT_TIME = 1
-MOVING_CARS_AMOUNT = 1
-WAIT_TIME = 1
-
 
 class Solver(ABC):
     def __init__(self, n: int, m: int, t: int, reporter: Reporter):
@@ -100,10 +95,10 @@ class Solver(ABC):
         score_wait_time_punishment = self.normalize_wait_time_punishment(total_wait_time_punishment,
                                                                          cities_amount, cars_amount, report)
 
-        return (score_not_reaching * NOT_REACHING +
-                score_avg_wait_time * AVG_WAIT_TIME +
-                score_moving_cars * MOVING_CARS_AMOUNT +
-                score_wait_time_punishment * WAIT_TIME)
+        return (score_not_reaching +
+                score_avg_wait_time +
+                score_moving_cars +
+                score_wait_time_punishment)
 
     def get_wait_time_punishment(self, city: City) -> float:
         """
