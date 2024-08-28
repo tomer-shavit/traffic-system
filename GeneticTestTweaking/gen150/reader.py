@@ -79,6 +79,13 @@ def process_punishment(data_wait_punishment):
     data_wait_punishment = data_wait_punishment['wait_punishment'].flatten()
     return data_wait_punishment / (m * n)
 
+def save_solution_int(solution, number):
+    map_to_int = np.vectorize(lambda x: 0 if x == Direction.HORIZONTAL else 1)
+    # Convert the array
+    int_arr = map_to_int(solution['solution'][-1])
+    # Verify the dtype is now int
+    int_arr = int_arr.astype(int)
+    np.save(f'./best_solutions_int{number}.npy', int_arr)
 
 def load_data(number):
     """Load the necessary data from .npy files."""
@@ -125,7 +132,7 @@ def main():
     """Main function to load data and generate plots."""
     number = 494
     data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, data_best = load_data(number)
-
+    save_solution_int(data_best, number)
     plot_data(data_moving, 'blue', 92.95, 'General Traffic Flow', 'Number Of Cars That Moved')
     plot_data(data_not_reaching, 'purple', 128, 'How Many Cars Were Late', 'Number Of Cars')
     plot_data(data_wait_punishment, 'green', 1548.25, 'Car Starvation Punishment', 'Average Car Starvation Punishment')
