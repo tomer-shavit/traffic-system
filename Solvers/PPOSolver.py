@@ -47,9 +47,8 @@ class PPOSolver(Solver):
         counter = 0
         solution = []
 
-        while city.active_cars_amount() != 0 and counter < MAX_ITERATIONS:
+        for t in range(self.t):
             actions_for_current_tick = []
-
             for i in range(self.n - NEIGHBORHOOD_N + 1):
                 for j in range(self.m - NEIGHBORHOOD_M + 1):
                     top_left, top_right, bottom_left = self.build_neighborhood_coords(i, j)
@@ -60,12 +59,10 @@ class PPOSolver(Solver):
             assignment = self.vote_on_assignment(actions_for_current_tick)
             solution.append(assignment)
             city.update_city(assignment)
-            counter += 1
 
-        if counter >= MAX_ITERATIONS:
-            raise RuntimeError(f"Max iteration reached and there are still: {city.active_cars_amount()} active cars.")
-
+        city.reset_city()
         return np.array(solution)
+
     def neighborhood_count(self):
         return (self.n - NEIGHBORHOOD_N + 1) * (self.m - NEIGHBORHOOD_M + 1)
 
@@ -102,7 +99,12 @@ class PPOSolver(Solver):
 
             print(f"The score for city {index} is: {total_score / self.t}")
             scores.append(total_score / self.t)
+            city.reset_city()
+            solution = self.solve(city)
+            self.reporter.record_generations_best_solutions(self.evaluate_solution(solution, [city], report=True),
+                                                            solution)
             if scores[-1] > best_score:
+                self.reporter.save_all_data('../ReporterData/PPO')
                 self.agent.save_models()
                 best_score = scores[-1]
 
@@ -179,7 +181,7 @@ class PPOSolver(Solver):
 
         reward = self.evaluate(1, neighborhood.original_num_of_cars, not_reaching_cars, total_avg_wait_time,
                                moving_cars_amount, total_wait_time_punishment, report)
-        reward = 5 if done else reward
+        reward = 4 if done else reward
         self.reporter.record_generations_best_solutions(reward, self.all_actions[action])
 
         return reward, done

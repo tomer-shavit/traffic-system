@@ -6,7 +6,7 @@ n = 8  # City width
 m = 8  # City height
 t = 40  # Max time steps
 num_cars = 350  # Number of cars per city
-num_training_cities = 100  # Number of cities to train on
+num_training_cities = 1000  # Number of cities to train on
 
 reporter = Reporter()
 

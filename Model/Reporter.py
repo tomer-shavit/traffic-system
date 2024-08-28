@@ -62,7 +62,7 @@ class Reporter:
         )], dtype=self.wait_times.dtype)
         self.wait_times = np.append(self.wait_times, record)
 
-    def record_generations_best_solutions(self, fitness: int, solution: np.ndarray):
+    def record_generations_best_solutions(self, fitness: float, solution: np.ndarray):
         record = np.array([(
             fitness,
             solution
@@ -71,7 +71,7 @@ class Reporter:
 
     def save_all_data(self, directory):
         # Save each array to a separate file in the specified directory
-        id = random.randint(0, 1000)
+        id = 555
         np.save(f'{directory}/wait_times_check{id}.npy', self.wait_times)
         np.save(f'{directory}/all_cars_arrive_time{id}.npy', self.all_cars_arrive_time)
         np.save(f'{directory}/not_reaching_cars{id}.npy', self.not_reaching_cars)
