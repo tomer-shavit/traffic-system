@@ -1,3 +1,4 @@
+import random
 from itertools import product
 from typing import List, Tuple
 import numpy as np
@@ -70,46 +71,57 @@ class PPOSolver(Solver):
 
     def train(self, num_cities: int, num_cars: int) -> None:
         cities = City.generate_cities(self.n, self.m, num_cars, num_cities)
-        score_history = []
         best_score = float('-inf')
+        scores = []
 
         for index, city in enumerate(cities):
+            total_score = 0
             print(f"starting to going over city number {index + 1} out of {len(cities)}")
-            solution = np.empty((self.t, self.n, self.m), dtype=Direction)
             for t in range(self.t):
-                actions_for_current_tick = []
-                for i in range(self.n - NEIGHBORHOOD_N + 1):
-                    for j in range(self.m - NEIGHBORHOOD_M + 1):
-                        self.neighborhood_iteration(actions_for_current_tick, city, i, j) / self.neighborhood_count()
+                if t < 8:
+                    city.update_city(np.random.choice(list(Direction), size=(self.n, self.m)))
+                    continue
 
-                assignment = self.vote_on_assignment(actions_for_current_tick)
-                solution[t] = assignment
+                neighborhood = self.get_random_neighborhood(city)
+                while neighborhood.original_num_of_cars == 0:
+                    neighborhood = self.get_random_neighborhood(city)
+                # city.print(np.random.choice(list(Direction), size=(self.n, self.m)))
+                counter = 0
+                total_reward = 0
+                done = False
+                while not done:
+                    counter += 1
+                    reward, done = self.neighborhood_iteration(neighborhood, counter)
+                    total_reward += reward
+
+                total_score += total_reward / counter
+
                 self.agent.learn()
+                assignment = np.random.choice(list(Direction), size=(self.n, self.m))
                 city.update_city(assignment)
 
-            city.reset_city()
-            score = self.evaluate_solution(solution, [city])
-            print(f"Score for city {index+1} is: {score}")
-            score_history.append(score)
-            avg_score = np.mean(score_history[-100:])
-
-            if avg_score > best_score:
-                print(f"best score updated from: {best_score} to avg score: {avg_score}")
-                best_score = avg_score
+            print(f"The score for city {index} is: {total_score / self.t}")
+            scores.append(total_score / self.t)
+            if scores[-1] > best_score:
                 self.agent.save_models()
+                best_score = scores[-1]
 
-        # need to consider what we want to report
-        self.reporter.report_training_results(score_history, best_score)
 
-    def neighborhood_iteration(self, actions_for_current_tick, city, i, j) -> float:
+    def get_random_neighborhood(self, city):
+        i = random.randint(0, self.n - NEIGHBORHOOD_N)
+        j = random.randint(0, self.m - NEIGHBORHOOD_M)
         top_left, top_right, bottom_left = self.build_neighborhood_coords(i, j)
-        neighborhood = city.get_neighborhood(top_left, top_right, bottom_left)
+        return city.get_neighborhood(top_left, top_right, bottom_left)
+
+    def neighborhood_iteration(self, neighborhood, iteration: int):
         action, prob, val = self.agent.choose_action(neighborhood.get_state())
         reward, done = self.evaluate_neighborhood(action, neighborhood)
-        actions_for_current_tick.append(action)
+        if iteration == MAX_ITERATIONS:
+            reward = 0
+            done = True
         self.agent.remember(neighborhood.get_state(), action, prob, val, reward, done)
 
-        return reward
+        return reward, done
 
     def build_neighborhood_coords(self, i, j):
         top_left = Coordinate(i, j)
@@ -151,8 +163,13 @@ class PPOSolver(Solver):
     def evaluate_neighborhood(self, action: int, neighborhood: Neighborhood, report: bool = False) -> Tuple[int, bool]:
         # TODO: implement diminishing effect when calculating the reward
         cur_action = action
-        for _ in range(NUM_OF_SIMULATIONS):
+        done = False
+        for i in range(NUM_OF_SIMULATIONS):
             neighborhood.update_neighborhood(self.all_actions[cur_action])
+            if i == 0:
+                done = neighborhood.active_cars_amount() == 0
+                neighborhood = Neighborhood.deep_copy(neighborhood)
+
             cur_action, _, _ = self.agent.choose_action(neighborhood.get_state())
 
         total_avg_wait_time = neighborhood.grid.get_total_avg_wait_time()
@@ -162,7 +179,8 @@ class PPOSolver(Solver):
 
         reward = self.evaluate(1, neighborhood.original_num_of_cars, not_reaching_cars, total_avg_wait_time,
                                moving_cars_amount, total_wait_time_punishment, report)
-        done = neighborhood.original_num_of_cars == 0
+        reward = 5 if done else reward
+        self.reporter.record_generations_best_solutions(reward, self.all_actions[action])
 
         return reward, done
 
