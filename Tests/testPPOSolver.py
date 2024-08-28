@@ -1,11 +1,12 @@
 from Solvers.PPOSolver import PPOSolver
 from Model.Reporter import Reporter
 
-n = 10  # City width
-m = 10  # City height
-t = 100  # Max time steps
-num_cars = 50  # Number of cars per city
-num_training_cities = 50  # Number of cities to train on
+
+n = 8  # City width
+m = 8  # City height
+t = 40  # Max time steps
+num_cars = 350  # Number of cars per city
+num_training_cities = 100  # Number of cities to train on
 
 reporter = Reporter()
 

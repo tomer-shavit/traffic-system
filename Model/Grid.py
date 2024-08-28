@@ -29,6 +29,19 @@ class Grid:
         self.junctions: List[List[Junction]] = self.init_junctions(traffic_lights)
         self.total_car_movements = 0
 
+    @classmethod
+    def copy(cls, other: 'Grid', traffic_lights: List[List[TrafficLight]]) -> 'Grid':
+        new_grid = cls(
+            traffic_lights,
+            other.vertical_highway_junctions,
+            other.horizontal_highway_junctions)
+
+        for i in range(other.n):
+            for j in range(other.m):
+                new_grid.junctions[i][j].cars_wait_time = other.junctions[i][j].cars_wait_time.copy()
+
+        return new_grid
+
     def init_junctions(self, traffic_lights) -> List[List[Junction]]:
         """
         Initialize a 2D array of Junctions by the given traffic light configuration.
@@ -94,9 +107,9 @@ class Grid:
                 self.total_car_movements += len(moving_cars)
 
                 for car in moving_cars:
-                    if direction == Direction.VERTICAL and i < self.n - 1:
+                    if direction == Direction.VERTICAL and i < self.n:
                         cars_to_move.append((car, Coordinate(i, j), Coordinate(i + 1, j)))  # Move Up
-                    elif direction == Direction.HORIZONTAL and j < self.m - 1:
+                    elif direction == Direction.HORIZONTAL and j < self.m:
                         cars_to_move.append((car, Coordinate(i, j), Coordinate(i, j + 1)))  # Move Right
         return cars_to_move
 

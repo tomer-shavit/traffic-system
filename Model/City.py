@@ -1,5 +1,5 @@
 from typing import List, Dict
-
+import copy
 import numpy as np
 from numpy import ndarray
 from Model.Car import Car
@@ -18,20 +18,37 @@ INF_INT = 10000
 
 
 class Neighborhood:
-    def __init__(self, cars: List[Car], traffic_lights: List[List[TrafficLight]],
-                 grid: Grid, traffic_system: TrafficSystem, shift_x: int, shift_y: int):
+    def __init__(self, cars: List[Car], grid: Grid, traffic_system: TrafficSystem, shift_x: int, shift_y: int):
 
         self.original_num_of_cars = len(cars)
         self.cars: List[Car] = cars
-        self.traffic_lights = traffic_lights
         self.traffic_system = traffic_system
         self.grid = grid
         self.cars = cars
         self.shift_x = shift_x
         self.shift_y = shift_y
-        self.num_of_active_cars = len(self.cars)
         self.n = len(self.grid.junctions)
         self.m = len(self.grid.junctions[0])
+
+    @classmethod
+    def deep_copy(cls, other: 'Neighborhood') -> 'Neighborhood':
+        copy_cars = [Car.copy_constructor(car) for car in other.cars]
+        copy_traffic_lights = [[TrafficLight() for _ in range(other.m)] for _ in range(other.n)]
+        copy_grid = Grid.copy(other.grid, copy_traffic_lights)  # with wait times
+        copy_traffic_system = TrafficSystem(copy_traffic_lights)
+        for car in copy_cars:
+            neighborhood_location = (
+                Coordinate(car.current_location.x - other.shift_x, car.current_location.y - other.shift_y))
+            if neighborhood_location.y < other.m and neighborhood_location.x < other.n:
+                copy_grid.add_car_to_junction(car, neighborhood_location)
+
+        return cls(
+            copy_cars,
+            copy_grid,
+            copy_traffic_system,
+            other.shift_x,
+            other.shift_y
+        )
 
     def get_state(self) -> ndarray:
         rows = len(self.grid.junctions)
@@ -64,13 +81,17 @@ class Neighborhood:
         for car in self.cars:
             if self.grid.out_of_grid(car.current_location) and not car.get_did_arrive():
                 car.set_did_arrive(True)
-                self.num_of_active_cars -= 1
             elif car.current_location == car.destination and not car.get_did_arrive():
                 self.grid.junctions[car.destination.x][car.destination.y].remove_car(car)
-                self.num_of_active_cars -= 1
 
     def active_cars_amount(self) -> int:
-        return self.num_of_active_cars
+        amount = 0
+        for junctions in self.grid.junctions:
+            for junction in junctions:
+                amount += len(junction.cars)
+
+        return amount
+
 
     def print(self, assignment: ndarray):
         """Print a visual representation of the City."""
@@ -328,9 +349,9 @@ class City:
 
         copy_grid = Grid(copy_traffic_lights, vertical_highway_junctions, horizontal_highway_junctions)
         copy_traffic_system = TrafficSystem(copy_traffic_lights)
-
         copy_cars = self.get_copy_cars(bottom_left, copy_grid, top_left, top_right)
-        return Neighborhood(copy_cars, copy_traffic_lights, copy_grid, copy_traffic_system, top_left.x, top_left.y)
+
+        return Neighborhood(copy_cars, copy_grid, copy_traffic_system, top_left.x, top_left.y)
 
     def get_copy_cars(self, bottom_left, copy_grid, top_left, top_right):
         copy_cars = []
