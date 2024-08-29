@@ -1,16 +1,11 @@
-import os
-
 import numpy as np
 import torch as T
-import torch.nn as nn
-import torch.optim as optim
-from torch.distributions.categorical import Categorical
-
 from PPO.ActorNetwork import ActorNetwork
 from PPO.CriticNetwork import CriticNetwork
 from PPO.PPOMemory import PPOMemory
 
 C1 = 0.5
+
 
 class Agent:
     def __init__(self, input_dims, n_actions, gamma=0.99, alpha=0.0003, gae_lambda=0.95,
@@ -25,19 +20,39 @@ class Agent:
         self.memory = PPOMemory(batch_size)
 
     def remember(self, state, action, prob, val, reward, done):
+        """
+        Store experience in memory for later use during training.
+        :param state: The state observed.
+        :param action: The action taken.
+        :param prob: The probability of the taken action.
+        :param val: The value estimate of the state.
+        :param reward: The reward received.
+        :param done: Boolean indicating whether the episode is finished.
+        """
         self.memory.store_memory(state, action, prob, val, reward, done)
 
     def save_models(self):
+        """
+        Save the models' parameters to checkpoint files.
+        """
         print("... Saving Models ...")
         self.actor.save_checkpoint()
         self.critic.save_checkpoint()
 
     def load_models(self):
+        """
+        Load the models' parameters from checkpoint files.
+        """
         print("... Loading Models ...")
         self.actor.load_checkpoint()
         self.critic.load_checkpoint()
 
     def choose_action(self, observation):
+        """
+        Choose an action based on the current observation of the environment.
+        :param observation: The current state of the environment.
+        :return: The selected action, log probability of the action, and value estimate of the state.
+        """
         state = T.tensor([observation], dtype=T.float).to(self.actor.device)
         dist = self.actor(state)
         value = self.critic(state)
@@ -50,6 +65,9 @@ class Agent:
         return action, probs, value
 
     def learn(self):
+        """
+        Perform learning by updating the actor and critic networks using the collected experiences.
+        """
         for _ in range(self.n_epochs):
             state_arr, action_arr, old_probs_arr, vals_arr, reword_arr, done_arr, batches = \
                 self.memory.generate_batches()
@@ -63,8 +81,8 @@ class Agent:
                 old_probs = T.tensor(old_probs_arr[batch], dtype=T.float).to(self.actor.device)
                 actions = T.tensor(action_arr[batch], dtype=T.float).to(self.actor.device)
 
-                dist = self.actor(states)  # maybe should be self.actor.actor
-                critic_value = self.critic(states)  # same
+                dist = self.actor(states)
+                critic_value = self.critic(states)
                 critic_value = T.squeeze(critic_value)
 
                 new_probs = dist.log_prob(actions)
@@ -76,7 +94,7 @@ class Agent:
                 returns = advantages[batch] + values[batch]
                 critic_loss = ((returns-critic_value)**2).mean()
 
-                total_loss = actor_loss + C1*critic_loss
+                total_loss = actor_loss + C1 * critic_loss
                 self.actor.optimizer.zero_grad()
                 self.critic.optimizer.zero_grad()
                 total_loss.backward()
@@ -85,9 +103,14 @@ class Agent:
 
         self.memory.clear_memory()
 
-
-
     def generate_advantages(self, done_arr, reword_arr, values):
+        """
+        Calculate the advantage estimates used for policy updates.
+        :param done_arr: Array indicating whether an episode has finished.
+        :param reword_arr: Array of received rewards.
+        :param values: Array of value estimates from the critic network.
+        :return: Tensor containing the calculated advantages.
+        """
         advantage = np.zeros(len(reword_arr), dtype=np.float32)
         for t in range(len(reword_arr) - 1):
             discount = 1
@@ -98,9 +121,3 @@ class Agent:
 
             advantage[t] = a_t
         return T.tensor(advantage).to(self.actor.device)
-
-
-
-
-
-

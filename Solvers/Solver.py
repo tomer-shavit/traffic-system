@@ -52,10 +52,6 @@ class Solver(ABC):
             not_reaching_cars += city.active_cars_amount()
             moving_cars_amount += city.get_total_cars_movements()
             total_wait_time_punishment += self.get_wait_time_punishment(city)
-
-            print(f"avg wait time is: {city.get_current_avg_wait_time()}")
-            print(f"Num of active cars is: {city.active_cars_amount()}")
-            self.reporter.record_all_cars_arrive(city.all_cars_arrived_time)
             city.reset_city()
 
         return self.evaluate(len(cities),

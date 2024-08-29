@@ -1,10 +1,8 @@
-from typing import List, Callable
-
 import numpy as np
-
+import random
+from typing import List, Callable
 from Model.Coordinate import Coordinate
 from Model.Direction import Direction
-import random
 
 NOISE_CAR_PATH = 0.03
 
@@ -35,6 +33,30 @@ class Car:
         new_car._current_location_index = other_car._current_location_index
         new_car._did_arrive = other_car._did_arrive
         return new_car
+
+    @property
+    def id(self) -> str:
+        return self._id
+
+    @property
+    def source(self) -> Coordinate:
+        return self._source
+
+    @property
+    def destination(self) -> Coordinate:
+        return self._destination
+
+    @property
+    def current_location(self) -> Coordinate:
+        return self._path[self._current_location_index]
+
+    @property
+    def start_time(self) -> int:
+        return self._start_time
+
+    @property
+    def path(self) -> List[Coordinate]:
+        return self._path
 
     def current_direction(self) -> Direction:
         """
@@ -90,30 +112,6 @@ class Car:
     def reset(self):
         self._did_arrive = False
         self._current_location_index = 0
-
-    @property
-    def id(self) -> str:
-        return self._id
-
-    @property
-    def source(self) -> Coordinate:
-        return self._source
-
-    @property
-    def destination(self) -> Coordinate:
-        return self._destination
-
-    @property
-    def current_location(self) -> Coordinate:
-        return self._path[self._current_location_index]
-
-    @property
-    def start_time(self) -> int:
-        return self._start_time
-
-    @property
-    def path(self) -> List[Coordinate]:
-        return self._path
 
     def _flip_next_step(self, current: Coordinate, next_step: Coordinate) -> Coordinate:
         """
