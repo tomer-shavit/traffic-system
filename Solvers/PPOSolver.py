@@ -10,21 +10,51 @@ from PPO.Agent import Agent
 from Model.Reporter import Reporter
 from Solvers.Solver import Solver
 
+# The value 4 because:
+# 1) Num of cars that are waiting vertical.
+# 2) Num of cars that are waiting Horizontal
+# 3) Is it vertical highway (0/1)
+# 4) Is it horizontal highway (0/1)
 NUM_OF_REPRESENTATIONS = 4
 
+# Size of the neighborhood
 NEIGHBORHOOD_N = 3
 NEIGHBORHOOD_M = 3
-# If learning is too slow: Try increasing the batch size or the number of epochs.
-# If learning is unstable: Try decreasing the batch size or the number of epochs.
-# If you're facing memory constraints: Decrease the batch size.
+
+# How many experiences are included in each mini-batch during the training process
+# A batch size of 20 strikes a balance between stability and efficiency in learning.
+# Smaller batch sizes can lead to noisier updates, while larger ones provide more stable
+# gradients but require more memory.
 BATCH_SIZE = 20
+
+# The number of times the learning algorithm will pass through the entire training dataset.
+# In each epoch, the model's parameters are updated based on the
+# gradients computed from the mini-batches.
 NUM_OF_EPOCHS = 5
+
 NUM_OF_SIMULATIONS = 6
 MAX_ITERATIONS = 100
 
 
 class PPOSolver(Solver):
+    """
+    A solver that uses Proximal Policy Optimization (PPO) to optimize traffic light configurations
+    within a city grid.
+
+    Attributes:
+        all_actions (List[np.ndarray]): A list of all possible traffic light configurations for neighborhoods.
+        agent (Agent): The PPO agent that learns and selects actions.
+    """
+
     def __init__(self, n: int, m: int, t: int, reporter: Reporter):
+        """
+        Initializes the PPOSolver with the grid dimensions, time steps, and reporter.
+        Args:
+            n (int): Number of rows in the city grid.
+            m (int): Number of columns in the city grid.
+            t (int): Number of time steps for the simulation.
+            reporter (Reporter): An object for recording results and metrics.
+        """
         super().__init__(n, m, t, reporter)
         self.all_actions = self.init_all_actions()
         self.agent = self.init_agent()
@@ -39,11 +69,26 @@ class PPOSolver(Solver):
         return NEIGHBORHOOD_M * NEIGHBORHOOD_M * NUM_OF_REPRESENTATIONS,
 
     def init_all_actions(self) -> List[np.ndarray]:
+        """
+        Initializes all possible traffic light configurations for neighborhoods.
+
+        Returns:
+            List[np.ndarray]: A list of all possible configurations.
+        """
         possible_combinations = list(product([Direction.HORIZONTAL, Direction.VERTICAL],
                                              repeat=NEIGHBORHOOD_M * NEIGHBORHOOD_M))
         return [np.array(combination).reshape(NEIGHBORHOOD_N, NEIGHBORHOOD_M) for combination in possible_combinations]
 
     def solve(self, city: City) -> np.ndarray:
+        """
+        Solves the traffic light optimization problem for the given city over the time steps.
+
+        Args:
+            city (City): The city grid to optimize.
+
+        Returns:
+            np.ndarray: The optimal traffic light configuration for each time step.
+        """
         counter = 0
         solution = []
 
@@ -64,9 +109,22 @@ class PPOSolver(Solver):
         return np.array(solution)
 
     def neighborhood_count(self):
+        """
+        Calculates the number of neighborhoods in the city grid.
+
+        Returns:
+            int: The number of neighborhoods.
+        """
         return (self.n - NEIGHBORHOOD_N + 1) * (self.m - NEIGHBORHOOD_M + 1)
 
     def train(self, num_cities: int, num_cars: int) -> None:
+        """
+       Trains the PPO agent on a set of generated cities.
+
+       Args:
+           num_cities (int): The number of cities to generate for training.
+           num_cars (int): The number of cars in each city.
+       """
         cities = City.generate_cities(self.n, self.m, num_cars, num_cities)
         best_score = float('-inf')
         scores = []
@@ -108,7 +166,6 @@ class PPOSolver(Solver):
                 self.agent.save_models()
                 best_score = scores[-1]
 
-
     def get_random_neighborhood(self, city):
         i = random.randint(0, self.n - NEIGHBORHOOD_N)
         j = random.randint(0, self.m - NEIGHBORHOOD_M)
@@ -116,6 +173,16 @@ class PPOSolver(Solver):
         return city.get_neighborhood(top_left, top_right, bottom_left)
 
     def neighborhood_iteration(self, neighborhood, iteration: int):
+        """
+        Executes one iteration of the PPO agent on a neighborhood.
+
+        Args:
+            neighborhood (Neighborhood): The neighborhood to optimize.
+            iteration (int): The current iteration number.
+
+        Returns:
+            Tuple[int, bool]: The reward and a boolean indicating if the episode is done.
+        """
         action, prob, val = self.agent.choose_action(neighborhood.get_state())
         reward, done = self.evaluate_neighborhood(action, neighborhood)
         if iteration == MAX_ITERATIONS:
@@ -132,6 +199,15 @@ class PPOSolver(Solver):
         return top_left, top_right, bottom_left
 
     def vote_on_assignment(self, actions: List[int]) -> np.ndarray:
+        """
+       Aggregates votes from multiple actions to determine the final traffic light assignment.
+
+       Args:
+           actions (List[int]): A list of action indices selected by the agent.
+
+       Returns:
+           np.ndarray: The final traffic light assignment for the city grid.
+       """
         votes = np.zeros((self.n, self.m, 2), dtype=int)
 
         for i in range(self.n - NEIGHBORHOOD_N + 1):
@@ -163,6 +239,17 @@ class PPOSolver(Solver):
         return assignment
 
     def evaluate_neighborhood(self, action: int, neighborhood: Neighborhood, report: bool = False) -> Tuple[int, bool]:
+        """
+        Evaluates the neighborhood's traffic performance based on a given action.
+
+        Args:
+            action (int): The action index chosen by the agent.
+            neighborhood (Neighborhood): The neighborhood to evaluate.
+            report (bool): Whether to generate a report on the evaluation.
+
+        Returns:
+            Tuple[int, bool]: The reward value and a boolean indicating if all cars have exited the neighborhood,
+        """
         # TODO: implement diminishing effect when calculating the reward
         cur_action = action
         done = False
