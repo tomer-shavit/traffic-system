@@ -17,6 +17,7 @@ from Solvers.Solver import Solver
 # 4) Is it horizontal highway (0/1)
 NUM_OF_REPRESENTATIONS = 4
 
+# Size of the neighborhood
 NEIGHBORHOOD_N = 3
 NEIGHBORHOOD_M = 3
 
@@ -26,11 +27,10 @@ NEIGHBORHOOD_M = 3
 # gradients but require more memory.
 BATCH_SIZE = 20
 
-# The number of epochs in a machine learning context refers to the number of times the learning algorithm will
-# pass through the entire training dataset. In each epoch, the model's parameters are updated based on the
+# The number of times the learning algorithm will pass through the entire training dataset.
+# In each epoch, the model's parameters are updated based on the
 # gradients computed from the mini-batches.
 NUM_OF_EPOCHS = 5
-
 
 NUM_OF_SIMULATIONS = 6
 MAX_ITERATIONS = 100
