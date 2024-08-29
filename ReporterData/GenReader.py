@@ -44,16 +44,13 @@ def plot_direction_counts(junction_data):
 
 
 def highway_analyzing(data_best):
-    for a in range(3):
-        print(f'\na = {a}:')
-        last_solution = data_best['solution'][-a]
-        city = City.generate_city(n, m, num_cars)
-        for i, junctions in enumerate(city.grid.junctions):
-            for j, junction in enumerate(junctions):
-                if junction.get_is_vertical_highway():
-                    seperation(i, j, last_solution, 'vertical')
-                if junction.get_is_horizontal_highway():
-                    seperation(i, j, last_solution, 'horizontal')
+    city = City.generate_city(n, m, num_cars)
+    for i, junctions in enumerate(city.grid.junctions):
+        for j, junction in enumerate(junctions):
+            if junction.get_is_vertical_highway():
+                seperation(i, j, data_best, 'vertical')
+            if junction.get_is_horizontal_highway():
+                seperation(i, j, data_best, 'horizontal')
 
 
 def seperation(i, j, last_solution, direction):
@@ -79,21 +76,14 @@ def process_punishment(data_wait_punishment):
     data_wait_punishment = data_wait_punishment['wait_punishment'].flatten()
     return data_wait_punishment / (m * n)
 
-def save_solution_int(solution, number):
-    map_to_int = np.vectorize(lambda x: 0 if x == Direction.HORIZONTAL else 1)
-    # Convert the array
-    int_arr = map_to_int(solution['solution'][-1])
-    # Verify the dtype is now int
-    int_arr = int_arr.astype(int)
-    np.save(f'./best_solutions_int{number}.npy', int_arr)
 
 def load_data(number):
     """Load the necessary data from .npy files."""
-    data_moving = np.load(f'moving_cars_amount{number}.npy').flatten()
-    data_not_reaching = np.load(f'not_reaching_cars{number}.npy').flatten()
-    data_wait_punishment = np.load(f'wait_time_punishment{number}.npy').flatten()
-    data_avg_wait_time = np.load(f'wait_times_check{number}.npy').flatten()
-    data_best = np.load(f'best_solutions{number}.npy', allow_pickle=True)
+    data_moving = np.load(f'GeneticTestTweaking/gen150/moving_cars_amount{number}.npy').flatten()
+    data_not_reaching = np.load(f'GeneticTestTweaking/gen150/not_reaching_cars{number}.npy').flatten()
+    data_wait_punishment = np.load(f'GeneticTestTweaking/gen150/wait_time_punishment{number}.npy').flatten()
+    data_avg_wait_time = np.load(f'GeneticTestTweaking/gen150/wait_times_check{number}.npy').flatten()
+    data_best = np.load(f'GeneticTestTweaking/gen150/best_solutions_direction{number}.npy', allow_pickle=True)
 
     data_moving = process_moving(data_moving)
     data_avg_wait_time = process_avg_wait_time(data_avg_wait_time)
@@ -130,9 +120,8 @@ def plot_fitness(data_best):
 
 def main():
     """Main function to load data and generate plots."""
-    number = 90
+    number = 494
     data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, data_best = load_data(number)
-    save_solution_int(data_best, number)
     plot_data(data_moving, 'blue', 92.95, 'General Traffic Flow', 'Number Of Cars That Moved')
     plot_data(data_not_reaching, 'purple', 128, 'How Many Cars Were Late', 'Number Of Cars')
     plot_data(data_wait_punishment, 'green', 1548.25, 'Car Starvation Punishment', 'Average Car Starvation Punishment')
