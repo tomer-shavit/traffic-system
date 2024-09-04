@@ -1,41 +1,41 @@
+
 # Traffic System
 
-## Grid Shape (m, n)
+## Overview
+This project tackles morning traffic congestion by simulating a city with optimized traffic light systems. We use a grid-based matrix to represent traffic lights and apply Genetic Algorithms and Reinforcement Learning to generate and evaluate traffic flow solutions. The goal is to enhance traffic management during peak hours and provide insights applicable to real-world scenarios.
 
-The grid is structured as follows:
+## Prerequisites
+- Install the required libraries by `requirements.txt`
 
-- `m` represents the number of columns (indexed by `j`)
-- `n` represents the number of rows (indexed by `i`)
+## Project Structure
 
-## Matrix Representation
+### Step 1: Train the AI Algorithms
 
-Here is a visual representation of the matrix:
+1. **BaseLine Algorithm:**
+    - **File Path:** `Tests/BaseLineTest.py`
+    - **Description:** This script runs the BaseLine algorithm and prints the results.
 
-|       | **j = 0** | **j = 1** | **...** | **j = m-1** |
-|-------|:---------:|:---------:|:-------:|:-----------:|
-| **i = 0** | (0, 0)   | (0, 1)   | ...     | (0, m-1)     |
-| **i = 1** | (1, 0)   | (1, 1)   | ...     | (1, m-1)     |
-| **...**   | ...      | ...      | ...     | ...          |
-| **i = n-1** | (n-1, 0) | (n-1, 1) | ...     | (n-1, m-1)   |
+2. **Genetic Algorithm:**
+    - **File Path:** `Tests/GenTest.py`
+    - **Description:** This script trains the Genetic Algorithm and saves the results in the designated directory.
 
-- Each cell `(i, j)` in the table corresponds to the grid coordinates.
-- The top-left corner of the grid is `(0, 0)`, and the bottom-right corner is `(n-1, m-1)`.
+3. **PPO Algorithm:**
+    - **File Path:** `Tests/PPOTest.py`
+    - **Description:** This script trains the PPO (Proximal Policy Optimization) algorithm and saves the results in the designated directory.
 
+### Step 2: Generate Visualizations
 
-## Hyper Parameters
-1. size of the city: m, n 
-2. Total time for a single run: t
-3. Num of cars
-4. Num of cities
+1. **Genetic Algorithm Results:**
+    - **File Path:** `RepoterData/GenReader.py`
+    - **Description:** This script generates graphs from the data saved by the Genetic Algorithm.
 
-### Genetic algorithm
-1. population_size: The number of solutions in each generation's population.
-2. Mutation rate: The probability of a mutation occurring at each gene in a solution.
-3. generations: The number of generations to evolve the population.
+2. **PPO Algorithm Results:**
+    - **File Path:** `RepoterData/PPOReader.py`
+    - **Description:** This script generates graphs from the data saved by the PPO algorithm.
 
-### PPO
-1. Neighborhood Size: The dimensions of the neighborhood grid. A 3x3 neighborhood is small enough to be computationally manageable but still complex enough to model various traffic patterns.
-2. BATCH_SIZE: How many experiences are included in each mini-batch during the training process
-3. NUM_OF_EPOCHS: The number of times the learning algorithm will pass through the entire training dataset
-4. policy_clip, gae_lambda, gamma, C1: Hyperparameters for the network.
-
+## Directory Structure
+- `Model`: All the classes in our City model
+- `PPO`: Our implementation of the PPO agents and networks.
+- `ReporterData`: A designated directory in which the solvers save their results.
+- `Solvers`: All of the different solvers we implemented.
+- `Test`: Has a basic test in order to run each solver.
