@@ -40,6 +40,7 @@ def load_data():
 
     return data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, data_best
 
+
 def plot_data(y_values, color, title, ylabel):
     """Plot a single dataset with baseline value and a moving average."""
     x_values = range(len(y_values))
@@ -57,14 +58,6 @@ def plot_data(y_values, color, title, ylabel):
     plt.grid(True)
     plt.show()
 
-def seperation(i, j, last_solution, direction):
-    print(f"junction ({i},{j}) {direction}")
-    junction_over_time = last_solution[:, i, j]
-    horizontal_count = np.sum(junction_over_time == Direction.HORIZONTAL)
-    vertical_count = np.sum(junction_over_time == Direction.VERTICAL)
-    print(f'horizontal_count = {horizontal_count}')
-    print(f'vertical_count = {vertical_count}')
-
 
 def plot_score(data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time):
     # Calculate the evaluation score
@@ -81,28 +74,31 @@ def plot_score(data_moving, data_not_reaching, data_wait_punishment, data_avg_wa
     plt.legend()
     plt.show()
 
-def evaluate_data(data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, t, m, n):
-    cars_amount = 350
-    score_not_reaching = normalize_not_reaching_cars(data_not_reaching, cars_amount)
-    score_avg_wait_time = normalize_avg_wait_time(data_avg_wait_time, cars_amount, t, m, n)
-    score_moving_cars = normalize_moving_cars_amount(data_moving, cars_amount, t)
-    score_wait_time_punishment = normalize_wait_time_punishment(data_wait_punishment, cars_amount, t)
 
+def evaluate_data(data_moving, data_not_reaching, data_wait_punishment, data_avg_wait_time, t, m, n):
+    score_not_reaching = normalize_not_reaching_cars(data_not_reaching, num_cars)
+    score_avg_wait_time = normalize_avg_wait_time(data_avg_wait_time, num_cars, t, m, n)
+    score_moving_cars = normalize_moving_cars_amount(data_moving, num_cars, t)
+    score_wait_time_punishment = normalize_wait_time_punishment(data_wait_punishment, num_cars, t)
     return (score_not_reaching + score_avg_wait_time + score_moving_cars + score_wait_time_punishment)
+
 
 def normalize_not_reaching_cars(not_reaching_cars, cars_amount):
     max_cars = cars_amount
     normalized_not_reaching_cars = not_reaching_cars / max_cars
     return 1 / (1 + normalized_not_reaching_cars)
 
+
 def normalize_avg_wait_time(total_avg_wait_time, cars_amount, t, m, n):
     max_waiting_cars = t * cars_amount / (m * n)
     normalized_total_avg_wait_time = total_avg_wait_time / max_waiting_cars
     return 1 / (1 + normalized_total_avg_wait_time)
 
+
 def normalize_moving_cars_amount(moving_cars_amount, cars_amount, t):
     max_moving_cars =  cars_amount * t
     return moving_cars_amount / max_moving_cars
+
 
 def normalize_wait_time_punishment(wait_time_punishment, cars_amount, t):
     max_punishment = (t * cars_amount ) ** 2
