@@ -1,5 +1,4 @@
 import numpy as np
-
 from Model.Direction import Direction
 from Model.Reporter import Reporter
 from Solvers.Solver import Solver
