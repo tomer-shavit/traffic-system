@@ -63,11 +63,11 @@ class Reporter:
         )], dtype=self.best_solutions.dtype)
         self.best_solutions = np.append(self.best_solutions, record)
 
-    def save_all_data(self, directory, experiment_id):
+    def save_all_data(self, directory):
         # Save each array to a separate file in the specified directory
-        np.save(f'{directory}/wait_times_check_{experiment_id}.npy', self.wait_times)
-        np.save(f'{directory}/all_cars_arrive_time_{experiment_id}.npy', self.all_cars_arrive_time)
-        np.save(f'{directory}/not_reaching_cars_{experiment_id}.npy', self.not_reaching_cars)
-        np.save(f'{directory}/moving_cars_amount_{experiment_id}.npy', self.moving_cars_amount)
-        np.save(f'{directory}/wait_time_punishment_{experiment_id}.npy', self.wait_time_punishment)
-        np.save(f'{directory}/best_solutions_{experiment_id}.npy', self.best_solutions, allow_pickle=True)
+        np.save(f'{directory}/wait_times_check.npy', self.wait_times)
+        np.save(f'{directory}/all_cars_arrive_time.npy', self.all_cars_arrive_time)
+        np.save(f'{directory}/not_reaching_cars.npy', self.not_reaching_cars)
+        np.save(f'{directory}/moving_cars_amount.npy', self.moving_cars_amount)
+        np.save(f'{directory}/wait_time_punishment.npy', self.wait_time_punishment)
+        np.save(f'{directory}/best_solutions.npy', self.best_solutions, allow_pickle=True)
