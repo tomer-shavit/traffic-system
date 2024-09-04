@@ -14,7 +14,3 @@ solution = solver.solve()
 
 cities = City.generate_cities(n,m, num_cars, num_cities)
 print(f"Evaluation for baseline= {solver.evaluate_solution(solution, cities)}")
-
-city = City.generate_city(n, m, num_cars)
-for _t in range(t):
-    city.update_city(solution[_t])

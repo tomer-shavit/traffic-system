@@ -12,8 +12,7 @@ reporter = Reporter()
 
 solver = PPOSolver(n, m, t, reporter)
 
-if __name__ == "__main__":
-    print("Training the solver...")
-    solver.train(num_training_cities, num_cars)
-    reporter.save_all_data('../ReporterData/PPO', 'PPO')
-    print("Training completed.")
+print("Training the solver...")
+solver.train(num_training_cities, num_cars)
+reporter.save_all_data('../ReporterData/PPO', 'PPO')
+print("Training completed.")
