@@ -169,14 +169,3 @@ class GeneticSolver(Solver):
         return np.concatenate(
             (children[:random_index], children[random_index + 1:], best_solution.reshape(1, self.t, self.n, self.m)))
 
-    def plot_best_fitness(self, fitness_values):
-        """
-        Plots the best fitness value in each generation.
-        """
-        plt.figure(figsize=(10, 6))
-        plt.plot(fitness_values, marker='o')
-        plt.title('Best Fitness Over Generations')
-        plt.xlabel('Generation')
-        plt.ylabel('Fitness (lower is better)')
-        plt.grid(True)
-        plt.show()
