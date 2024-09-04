@@ -1,5 +1,4 @@
 from typing import List, Dict
-
 from Model.Coordinate import Coordinate
 from Model.Junction import Junction
 from Model.TrafficLight import TrafficLight, Direction
@@ -76,6 +75,7 @@ class Grid:
             car.update_current_location()
 
     def update_sub_grid(self) -> None:
+        """Update the state of all junctions in the sub-grid of an neighborhood and move cars."""
         cars_to_move = self.get_cars_to_move()
         for car, old_coordinate, new_coordinate in cars_to_move:
             self.junctions[old_coordinate.x][old_coordinate.y].remove_car(car)

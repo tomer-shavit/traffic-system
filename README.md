@@ -21,8 +21,6 @@ Here is a visual representation of the matrix:
 - Each cell `(i, j)` in the table corresponds to the grid coordinates.
 - The top-left corner of the grid is `(0, 0)`, and the bottom-right corner is `(n-1, m-1)`.
 
-## Assumptions 
-1. The size of the city is at least 4X4
 
 ## Hyper Parameters
 1. size of the city: m, n 
@@ -39,5 +37,5 @@ Here is a visual representation of the matrix:
 1. Neighborhood Size: The dimensions of the neighborhood grid. A 3x3 neighborhood is small enough to be computationally manageable but still complex enough to model various traffic patterns.
 2. BATCH_SIZE: How many experiences are included in each mini-batch during the training process
 3. NUM_OF_EPOCHS: The number of times the learning algorithm will pass through the entire training dataset
-4. policy_clip, gae_lambda, gamma, C1: Hyperparameters we took from open AI paper.
+4. policy_clip, gae_lambda, gamma, C1: Hyperparameters for the network.
 

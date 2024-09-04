@@ -17,11 +17,4 @@ reporter = Reporter()
 solver = GeneticSolver(population_size, mutation_rate, generations, n, m, t, reporter)
 best_solution = solver.solve(num_cities, num_cars)
 solver.plot_best_fitness(reporter.best_solutions['fitness'])
-reporter.save_all_data('../ReporterData')
-
-# print the best solution:
-city = City.generate_city(n, m, num_cars)
-for _t in range(t):
-    city.update_city(best_solution[_t], True)
-
-
+reporter.save_all_data('../ReporterData', 'GA')

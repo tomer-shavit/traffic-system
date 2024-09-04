@@ -10,18 +10,18 @@ from PPO.Agent import Agent
 from Model.Reporter import Reporter
 from Solvers.Solver import Solver
 
-# The value 4 because:
-# 1) Num of cars that are waiting vertical.
-# 2) Num of cars that are waiting Horizontal
-# 3) Is it vertical highway (0/1)
-# 4) Is it horizontal highway (0/1)
+# The value is 4 because:
+# 1) Num of cars that are waiting to go vertical.
+# 2) Num of cars that are waiting to go Horizontal.
+# 3) Is it vertical highway (0/1).
+# 4) Is it horizontal highway (0/1).
 NUM_OF_REPRESENTATIONS = 4
 
 # Size of the neighborhood
 NEIGHBORHOOD_N = 3
 NEIGHBORHOOD_M = 3
 
-# How many experiences are included in each mini-batch during the training process
+# How many experiences are included in each mini-batch during the training process.
 # A batch size of 20 strikes a balance between stability and efficiency in learning.
 # Smaller batch sizes can lead to noisier updates, while larger ones provide more stable
 # gradients but require more memory.
@@ -159,10 +159,9 @@ class PPOSolver(Solver):
             scores.append(total_score / self.t)
             city.reset_city()
             solution = self.solve(city)
-            self.reporter.record_generations_best_solutions(self.evaluate_solution(solution, [city], report=True),
-                                                            solution)
+            self.reporter.record_best_solutions_scores(self.evaluate_solution(solution, [city], report=True),
+                                                       solution)
             if scores[-1] > best_score:
-                self.reporter.save_all_data('../ReporterData/PPO')
                 self.agent.save_models()
                 best_score = scores[-1]
 
@@ -269,7 +268,7 @@ class PPOSolver(Solver):
         reward = self.evaluate(1, neighborhood.original_num_of_cars, not_reaching_cars, total_avg_wait_time,
                                moving_cars_amount, total_wait_time_punishment, report)
         reward = 4 if done else reward
-        self.reporter.record_generations_best_solutions(reward, self.all_actions[action])
+        self.reporter.record_best_solutions_scores(reward, self.all_actions[action])
 
         return reward, done
 

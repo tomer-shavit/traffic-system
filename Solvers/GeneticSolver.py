@@ -134,10 +134,10 @@ class GeneticSolver(Solver):
             children = self.create_children(parents)
             population = self.add_best_to_children(children, best_solution)
             self.report_best_solution(best_solution, cities)
-            self.reporter.record_generations_best_solutions(best_fitness, best_solution)
+            self.reporter.record_best_solutions_scores(best_fitness, best_solution)
 
         best_final_solution, best_final_fitness = self.find_best_solution(population, fitness_scores)
-        self.reporter.record_generations_best_solutions(best_final_fitness, best_final_solution)
+        self.reporter.record_best_solutions_scores(best_final_fitness, best_final_solution)
 
         print(f"Final Best Fitness: {best_final_fitness}")
 
