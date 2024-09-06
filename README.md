@@ -2,7 +2,7 @@
 # Traffic System
 
 ## Overview
-This project tackles morning traffic congestion by simulating a city with optimized traffic light systems. We use a grid-based matrix to represent traffic lights and apply Genetic Algorithms and Reinforcement Learning to generate and evaluate traffic flow solutions. The goal is to enhance traffic management during peak hours and provide insights applicable to real-world scenarios.
+This project tackles morning traffic congestion by simulating a city and optimizing traffic light systems. We use a grid-based matrix to represent traffic lights and apply Genetic Algorithms and Reinforcement Learning to generate and evaluate traffic flow solutions. The goal is to enhance traffic management during peak hours and provide insights applicable to real-world scenarios.
 
 ## Prerequisites
 - Install the required libraries by `requirements.txt`
